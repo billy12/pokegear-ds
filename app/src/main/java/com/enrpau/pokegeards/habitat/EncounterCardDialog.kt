@@ -8,8 +8,10 @@ import android.view.Window
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import com.enrpau.pokegeards.PokemonType
 import com.enrpau.pokegeards.R
+import com.enrpau.pokegeards.ThemeManager
 import com.enrpau.pokegeards.data.db.EncounterRow
 
 /**
@@ -50,6 +52,18 @@ object EncounterCardDialog {
             "SpA ${s.baseSpa}   SpD ${s.baseSpd}   SPE ${s.baseSpe}   ·   BST ${s.baseHp + s.baseAtk + s.baseDef + s.baseSpa + s.baseSpd + s.baseSpe}"
 
         dialog.findViewById<TextView>(R.id.cardClose).setOnClickListener { dialog.dismiss() }
+
+        // Match the settings theme (OLED, etc.). Type badges keep their own colors.
+        val t = ThemeManager.currentTheme
+        if (t.id != "dynamic") {
+            dialog.findViewById<CardView>(R.id.cardRoot).setCardBackgroundColor(t.gridBackgroundColor)
+            dialog.findViewById<TextView>(R.id.cardName).setTextColor(t.headerTextColor)
+            dialog.findViewById<TextView>(R.id.cardDexId).setTextColor(t.subTextColor)
+            dialog.findViewById<TextView>(R.id.cardMeta).setTextColor(t.headerTextColor)
+            dialog.findViewById<TextView>(R.id.cardStats).setTextColor(t.subTextColor)
+            dialog.findViewById<TextView>(R.id.cardClose).setTextColor(t.headerTextColor)
+        }
+
         dialog.show()
     }
 

@@ -442,12 +442,17 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private var pokemonReceiverRegistered = false
+
     override fun onResume() {
         super.onResume()
         loadSettings()
 
-        val filter = IntentFilter("com.enrpau.pokegeards.POKEMON_DETECTED")
-        ContextCompat.registerReceiver(this, pokemonReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        if (!pokemonReceiverRegistered) {
+            val filter = IntentFilter("com.enrpau.pokegeards.POKEMON_DETECTED")
+            ContextCompat.registerReceiver(this, pokemonReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+            pokemonReceiverRegistered = true
+        }
     }
 
     override fun onPause() {
@@ -456,6 +461,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(pokemonReceiver)
+        // The redirect path (accessibility service on -> jump straight to Habitat)
+        // finishes this activity before onResume, so the receiver may never have
+        // been registered.
+        if (pokemonReceiverRegistered) {
+            unregisterReceiver(pokemonReceiver)
+            pokemonReceiverRegistered = false
+        }
     }
 }

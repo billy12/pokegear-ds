@@ -5,8 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.enrpau.pokegeards.AppTheme
 import com.enrpau.pokegeards.R
 import com.enrpau.pokegeards.data.db.EncounterRow
 
@@ -20,6 +22,14 @@ class EncounterAdapter(
 ) : RecyclerView.Adapter<EncounterAdapter.VH>() {
 
     private val items = ArrayList<EncounterRow>()
+
+    /** Settings theme (OLED etc.). Null = keep the layout's warm-paper defaults. */
+    private var theme: AppTheme? = null
+
+    fun applyTheme(t: AppTheme) {
+        theme = t
+        notifyDataSetChanged()
+    }
 
     fun submit(rows: List<EncounterRow>) {
         val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -60,6 +70,17 @@ class EncounterAdapter(
             tag.text = methodLabel(row.method) + timeSuffix(row.timeOfDay)
             caughtDot.visibility = if (row.isCaught) View.VISIBLE else View.INVISIBLE
             name.alpha = if (row.isCaught) 1f else 0.6f
+
+            theme?.let { t ->
+                val density = itemView.resources.displayMetrics.density
+                (itemView as? CardView)?.apply {
+                    setCardBackgroundColor(t.gridBackgroundColor)
+                    radius = t.cardCornerRadius * density
+                }
+                name.setTextColor(t.headerTextColor)
+                level.setTextColor(t.subTextColor)
+                rate.setTextColor(t.subTextColor)
+            }
 
             itemView.setOnClickListener { onToggleCaught(row) }
             itemView.setOnLongClickListener { onOpenCard(row); true }

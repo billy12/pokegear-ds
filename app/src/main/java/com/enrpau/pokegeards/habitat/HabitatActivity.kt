@@ -1,6 +1,7 @@
 package com.enrpau.pokegeards.habitat
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.widget.CompoundButton
@@ -9,8 +10,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.enrpau.pokegeards.AppTheme
 import com.enrpau.pokegeards.MainActivity
 import com.enrpau.pokegeards.R
+import com.enrpau.pokegeards.ThemeManager
 import com.enrpau.pokegeards.data.db.LocationRow
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
@@ -37,6 +40,7 @@ class HabitatActivity : AppCompatActivity() {
 
     private var packs: List<Pair<String, String>> = emptyList()
     private var locationList: List<LocationRow> = emptyList()
+    private var theme: AppTheme? = null
 
     private val adapter = EncounterAdapter(
         onToggleCaught = { row -> vm.setCaught(row.species.id, !row.isCaught) },
@@ -70,7 +74,45 @@ class HabitatActivity : AppCompatActivity() {
         rv.layoutManager = GridLayoutManager(this, span)
         rv.adapter = adapter
 
+        applyTheme()
         observe()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Settings screen may have changed the theme while we were backgrounded.
+        ThemeManager.loadTheme(this)
+        if (ThemeManager.currentTheme.id != theme?.id) applyTheme()
+    }
+
+    /** Carry the DualScreenDex settings theme (OLED, etc.) into the Habitat screen. */
+    private fun applyTheme() {
+        ThemeManager.loadTheme(this)
+        val t = ThemeManager.currentTheme
+        theme = t
+
+        findViewById<View>(R.id.habitatRoot).setBackgroundColor(t.windowBackground)
+        tvProgress.setTextColor(t.headerTextColor)
+        tvEmpty.setTextColor(t.subTextColor)
+        findViewById<TextView>(R.id.tvHint).setTextColor(t.subTextColor)
+
+        btnLocation.setTextColor(t.headerTextColor)
+        btnLocation.strokeColor = ColorStateList.valueOf(t.subTextColor)
+        btnLocation.iconTint = ColorStateList.valueOf(t.headerTextColor)
+        findViewById<MaterialButton>(R.id.btnMain).setTextColor(t.headerTextColor)
+
+        themeChip(chipPack)
+        themeChip(chipUncaught)
+
+        adapter.applyTheme(t)
+    }
+
+    private fun themeChip(chip: Chip) {
+        val t = theme ?: return
+        chip.setTextColor(t.headerTextColor)
+        chip.chipBackgroundColor = ColorStateList.valueOf(t.gridBackgroundColor)
+        chip.chipStrokeColor = ColorStateList.valueOf(t.subTextColor)
+        chip.chipStrokeWidth = 1f
     }
 
     private fun observe() {
@@ -148,6 +190,7 @@ class HabitatActivity : AppCompatActivity() {
                 isCheckedIconVisible = true
                 setOnClickListener { onToggle(value) }
             }
+            themeChip(chip)
             group.addView(chip)
         }
     }
