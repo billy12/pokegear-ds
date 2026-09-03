@@ -13,12 +13,12 @@ Design reference lives in the **my-brain** repo at `projects/pokegear-ds/`
 ## 0. Get it on real hardware first
 
 The single highest-value step. Everything below is easier to prioritise once
-you've used it next to an actual game on the AYANEO.
+you've used it next to an actual game on the AYN Thor.
 
 - **Android Studio** (optional but nice): `winget install --id Google.AndroidStudio`
   (approve the UAC prompt), open this repo, Settings → Android SDK → point at
   `%LOCALAPPDATA%\Android\Sdk` so it shares the existing SDK.
-- **Or stay CLI:** `.\gradlew.bat assembleDebug`, then plug in the AYANEO over USB
+- **Or stay CLI:** `.\gradlew.bat assembleDebug`, then plug in the Thor over USB
   (USB debugging on) and `adb install -r app\build\outputs\apk\debug\app-debug.apk`.
 - **Reaching the Habitat screen right now:** it's behind the "🌿 Habitat" button
   on the main screen, and `MainActivity` bounces to Accessibility Settings on
@@ -104,7 +104,7 @@ the fallback.
 
 ## 6. Real-device polish (after step 0 feedback)
 
-- Tune the layout for the AYANEO lower screen's real dimensions / aspect.
+- Tune the layout for the Thor lower screen's real dimensions / aspect.
 - OLED + power-saving options (PRD §3C, design.md §2.6).
 - Bigger touch targets if the grid feels cramped in hand.
 
