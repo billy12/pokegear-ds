@@ -14,28 +14,20 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipPack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="@string/habitat_location_label"
-            style="@style/Widget.Material3.Chip.Assist" />
-
-        <Spinner
-            android:id="@+id/spinnerLocation"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLocation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipUncaught"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/habitat_uncaught_only"
-            android:checkable="true"
-            style="@style/Widget.Material3.Chip.Filter" />
+            android:layout_weight="1"
+            android:text="@string/habitat_location_label"
+            android:textAlignment="viewStart"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:icon="@android:drawable/arrow_down_float"
+            app:iconGravity="end"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="#5D4037"
+            android:textColor="#3E2723" />
 
         <TextView
             android:id="@+id/tvProgress"
@@ -45,7 +37,44 @@
             android:textColor="#3E2723"
             android:textStyle="bold"
             android:textSize="13sp"
-            android:layout_marginStart="12dp" />
+            android:layout_marginStart="10dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="4dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipPack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:text="@string/habitat_location_label"
+            style="@style/Widget.Material3.Chip.Assist" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipUncaught"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/habitat_uncaught_only"
+            android:checkable="true"
+            style="@style/Widget.Material3.Chip.Filter" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/habitat_open_main"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:textColor="#8D6E63" />
     </LinearLayout>
 
     <HorizontalScrollView

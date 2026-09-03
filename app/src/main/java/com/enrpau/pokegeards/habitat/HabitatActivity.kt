@@ -1,31 +1,32 @@
 package com.enrpau.pokegeards.habitat
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.enrpau.pokegeards.MainActivity
 import com.enrpau.pokegeards.R
 import com.enrpau.pokegeards.data.db.LocationRow
-import android.widget.CompoundButton
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 
 /**
- * Lower-screen Habitat / Route tracker (design.md §2.4). Pick a location, see
- * every species that can appear there, tap to toggle caught, filter by
- * method / time, long-press for the encounter card.
+ * Lower-screen Habitat / Route tracker (design.md §2.4). Pick an area, see every
+ * species that can appear there, tap to toggle caught, filter by method / time,
+ * long-press for the encounter card. This is the app's home screen; the Pokédex
+ * / battle / settings screen is `MainActivity`, reached from the button here.
  */
 class HabitatActivity : AppCompatActivity() {
 
     private val vm: HabitatViewModel by viewModels()
 
-    private lateinit var spinner: Spinner
+    private lateinit var btnLocation: MaterialButton
     private lateinit var chipsMethod: ChipGroup
     private lateinit var chipsTime: ChipGroup
     private lateinit var rv: RecyclerView
@@ -33,45 +34,41 @@ class HabitatActivity : AppCompatActivity() {
     private lateinit var tvEmpty: TextView
     private lateinit var chipUncaught: Chip
     private lateinit var chipPack: Chip
+
     private var packs: List<Pair<String, String>> = emptyList()
+    private var locationList: List<LocationRow> = emptyList()
 
     private val adapter = EncounterAdapter(
         onToggleCaught = { row -> vm.setCaught(row.species.id, !row.isCaught) },
         onOpenCard = { row -> EncounterCardDialog.show(this, row) },
     )
 
-    private var locationList: List<LocationRow> = emptyList()
-    private var suppressSpinnerCallback = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_habitat)
         title = getString(R.string.habitat_title)
 
-        spinner = findViewById(R.id.spinnerLocation)
+        btnLocation = findViewById(R.id.btnLocation)
         chipsMethod = findViewById(R.id.chipsMethod)
         chipsTime = findViewById(R.id.chipsTime)
         rv = findViewById(R.id.rvEncounters)
         tvProgress = findViewById(R.id.tvProgress)
         tvEmpty = findViewById(R.id.tvEmpty)
         chipUncaught = findViewById(R.id.chipUncaught)
+        chipPack = findViewById(R.id.chipPack)
+
+        btnLocation.setOnClickListener { showLocationChooser() }
+        chipPack.setOnClickListener { showPackChooser() }
         chipUncaught.setOnCheckedChangeListener { _: CompoundButton, checked: Boolean ->
             vm.setUncaughtOnly(checked)
         }
-        chipPack = findViewById(R.id.chipPack)
-        chipPack.setOnClickListener { showPackChooser() }
+        findViewById<MaterialButton>(R.id.btnMain).setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java).putExtra("stay", true))
+        }
 
         val span = (resources.configuration.screenWidthDp / 110).coerceIn(2, 6)
         rv.layoutManager = GridLayoutManager(this, span)
         rv.adapter = adapter
-
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
-                if (suppressSpinnerCallback) return
-                locationList.getOrNull(pos)?.let { vm.selectLocation(it.id) }
-            }
-            override fun onNothingSelected(p: AdapterView<*>?) {}
-        }
 
         observe()
     }
@@ -79,14 +76,9 @@ class HabitatActivity : AppCompatActivity() {
     private fun observe() {
         vm.locations.observe(this) { locs ->
             locationList = locs
-            spinner.adapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                locs.map { labelFor(it) },
-            )
-            syncSpinnerSelection(vm.selectedLocationId.value)
+            updateLocationButton(vm.selectedLocationId.value)
         }
-        vm.selectedLocationId.observe(this) { syncSpinnerSelection(it) }
+        vm.selectedLocationId.observe(this) { updateLocationButton(it) }
 
         vm.availableMethods.observe(this) { methods ->
             rebuildChips(chipsMethod, methods.map { it to methodLabel(it) }) { vm.toggleMethod(it) }
@@ -103,6 +95,25 @@ class HabitatActivity : AppCompatActivity() {
 
         vm.packName.observe(this) { chipPack.text = it }
         vm.availablePacks.observe(this) { packs = it }
+    }
+
+    private fun updateLocationButton(locationId: Int?) {
+        val loc = locationList.firstOrNull { it.id == locationId }
+        btnLocation.text = loc?.let { labelFor(it) } ?: getString(R.string.habitat_location_label)
+    }
+
+    private fun showLocationChooser() {
+        if (locationList.isEmpty()) return
+        val labels = locationList.map { labelFor(it) }.toTypedArray()
+        val current = locationList.indexOfFirst { it.id == vm.selectedLocationId.value }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.habitat_location_dialog)
+            .setSingleChoiceItems(labels, current) { d, which ->
+                vm.selectLocation(locationList[which].id)
+                d.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun showPackChooser() {
@@ -122,15 +133,6 @@ class HabitatActivity : AppCompatActivity() {
     private fun labelFor(loc: LocationRow): String =
         if (loc.mapGroup.isNullOrBlank() || loc.mapGroup == "Overworld") loc.name
         else "${loc.name}  ·  ${loc.mapGroup}"
-
-    private fun syncSpinnerSelection(locationId: Int?) {
-        val idx = locationList.indexOfFirst { it.id == locationId }
-        if (idx >= 0 && idx != spinner.selectedItemPosition) {
-            suppressSpinnerCallback = true
-            spinner.setSelection(idx)
-            spinner.post { suppressSpinnerCallback = false }
-        }
-    }
 
     private fun rebuildChips(
         group: ChipGroup,

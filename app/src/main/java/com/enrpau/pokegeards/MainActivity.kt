@@ -74,6 +74,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeManager.loadTheme(this)
         super.onCreate(savedInstanceState)
+
+        // Habitat is the home screen. Fall through to the Pokédex/battle screen
+        // only when opened from the button there ("stay"), or when the
+        // accessibility service still needs enabling (the prompt lives below).
+        if (!intent.getBooleanExtra("stay", false) && isAccessibilityServiceEnabled()) {
+            startActivity(Intent(this, com.enrpau.pokegeards.habitat.HabitatActivity::class.java))
+            finish()
+            return
+        }
+
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 

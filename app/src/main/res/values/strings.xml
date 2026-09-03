@@ -45,4 +45,6 @@
     <string name="habitat_uncaught_only">Uncaught</string>
     <string name="habitat_pack_title">Data pack</string>
     <string name="open_bridge">🔌 bridge</string>
+    <string name="habitat_open_main">Pokédex ›</string>
+    <string name="habitat_location_dialog">Area</string>
 </resources>
