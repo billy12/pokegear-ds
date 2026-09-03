@@ -24,6 +24,7 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
     val selectedLocationId = MutableLiveData<Int?>(null)
     val methodFilter = MutableLiveData<Set<String>>(emptySet())
     val timeFilter = MutableLiveData<Set<String>>(emptySet())
+    val uncaughtOnly = MutableLiveData(false)
 
     val availableMethods = MutableLiveData<List<String>>(emptyList())
     val availableTimes = MutableLiveData<List<String>>(emptyList())
@@ -32,6 +33,7 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
         addSource(selectedLocationId) { reload() }
         addSource(methodFilter) { reload() }
         addSource(timeFilter) { reload() }
+        addSource(uncaughtOnly) { reload() }
     }
     val progress = MutableLiveData<AreaProgress>(AreaProgress(0, 0))
     val loading = MutableLiveData(false)
@@ -43,7 +45,9 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
                 locations.value = locs
                 // follow the shared game state if it already has a location, else first
                 val fromState = GameStateRepository.state.value?.locationId
-                selectedLocationId.value = fromState ?: locs.firstOrNull()?.id
+                val initial = fromState ?: locs.firstOrNull()?.id
+                selectedLocationId.value = initial
+                loadFiltersFor(initial)
             }
         }
         // keep in sync if OCR / another provider changes the location later
@@ -60,7 +64,16 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
         methodFilter.value = emptySet()
         timeFilter.value = emptySet()
         GameStateRepository.manual.setLocation(id)
-        if (id != null) io.execute {
+        loadFiltersFor(id)
+    }
+
+    private fun loadFiltersFor(id: Int?) {
+        if (id == null) {
+            availableMethods.value = emptyList()
+            availableTimes.value = emptyList()
+            return
+        }
+        io.execute {
             val m = db.methodsAt(id)
             val t = db.timesAt(id)
             main.post { availableMethods.value = m; availableTimes.value = t }
@@ -73,6 +86,10 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
 
     fun toggleTime(time: String) {
         timeFilter.value = timeFilter.value.orEmpty().toggle(time)
+    }
+
+    fun setUncaughtOnly(on: Boolean) {
+        if (uncaughtOnly.value != on) uncaughtOnly.value = on
     }
 
     fun setCaught(speciesId: Int, caught: Boolean) {
@@ -89,9 +106,11 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
         }
         val methods = methodFilter.value.orEmpty()
         val times = timeFilter.value.orEmpty()
+        val uncaught = uncaughtOnly.value == true
         main.post { loading.value = true }
         io.execute {
-            val rows = db.getEncounters(loc, methods, times)
+            var rows = db.getEncounters(loc, methods, times)
+            if (uncaught) rows = rows.filter { !it.isCaught }
             val prog = db.progressAt(loc)
             main.post {
                 encounters.value = rows

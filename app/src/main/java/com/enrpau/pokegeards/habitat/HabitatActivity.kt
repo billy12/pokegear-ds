@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.enrpau.pokegeards.R
 import com.enrpau.pokegeards.data.db.LocationRow
+import android.widget.CompoundButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 
@@ -30,6 +31,7 @@ class HabitatActivity : AppCompatActivity() {
     private lateinit var rv: RecyclerView
     private lateinit var tvProgress: TextView
     private lateinit var tvEmpty: TextView
+    private lateinit var chipUncaught: Chip
 
     private val adapter = EncounterAdapter(
         onToggleCaught = { row -> vm.setCaught(row.species.id, !row.isCaught) },
@@ -50,6 +52,10 @@ class HabitatActivity : AppCompatActivity() {
         rv = findViewById(R.id.rvEncounters)
         tvProgress = findViewById(R.id.tvProgress)
         tvEmpty = findViewById(R.id.tvEmpty)
+        chipUncaught = findViewById(R.id.chipUncaught)
+        chipUncaught.setOnCheckedChangeListener { _: CompoundButton, checked: Boolean ->
+            vm.setUncaughtOnly(checked)
+        }
 
         val span = (resources.configuration.screenWidthDp / 110).coerceIn(2, 6)
         rv.layoutManager = GridLayoutManager(this, span)

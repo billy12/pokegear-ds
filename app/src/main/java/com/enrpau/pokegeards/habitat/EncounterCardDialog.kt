@@ -40,7 +40,9 @@ object EncounterCardDialog {
             append(methodLabel(row.method))
             if (row.timeOfDay != "ANY") append(" · ${row.timeOfDay.lowercase().replaceFirstChar { it.uppercase() }}")
             append("\n").append(row.levelRange).append("  ·  ").append(row.rateText).append(" chance")
-            row.conditionNote?.takeIf { it.isNotBlank() }?.let { append("\n").append(it) }
+            row.conditionNote
+                ?.takeIf { it.isNotBlank() && !it.equals(methodLabel(row.method), true) && !it.equals(row.method, true) }
+                ?.let { append("\n").append(it) }
         }
 
         dialog.findViewById<TextView>(R.id.cardStats).text =

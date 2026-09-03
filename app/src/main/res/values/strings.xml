@@ -42,4 +42,5 @@
     <string name="habitat_meta_placeholder">Grass · Day\nLv 2–3 · 50%</string>
     <string name="habitat_stats_placeholder">HP 45  ATK 49  DEF 49</string>
     <string name="habitat_close">Close</string>
+    <string name="habitat_uncaught_only">Uncaught</string>
 </resources>

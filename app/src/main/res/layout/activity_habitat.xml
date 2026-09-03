@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#EFEBE9"
+    android:fitsSystemWindows="true"
     android:padding="12dp">
 
     <LinearLayout
@@ -27,6 +28,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipUncaught"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/habitat_uncaught_only"
+            android:checkable="true"
+            style="@style/Widget.Material3.Chip.Filter" />
 
         <TextView
             android:id="@+id/tvProgress"
