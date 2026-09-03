@@ -14,14 +14,13 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <TextView
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipPack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:text="@string/habitat_location_label"
-            android:textColor="#5D4037"
-            android:textStyle="bold"
-            android:textSize="12sp"
-            android:layout_marginEnd="8dp" />
+            style="@style/Widget.Material3.Chip.Assist" />
 
         <Spinner
             android:id="@+id/spinnerLocation"

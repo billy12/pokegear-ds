@@ -43,4 +43,5 @@
     <string name="habitat_stats_placeholder">HP 45  ATK 49  DEF 49</string>
     <string name="habitat_close">Close</string>
     <string name="habitat_uncaught_only">Uncaught</string>
+    <string name="habitat_pack_title">Data pack</string>
 </resources>

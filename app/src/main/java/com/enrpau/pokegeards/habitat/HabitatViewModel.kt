@@ -38,22 +38,55 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
     val progress = MutableLiveData<AreaProgress>(AreaProgress(0, 0))
     val loading = MutableLiveData(false)
 
+    val packName = MutableLiveData("")
+    val availablePacks = MutableLiveData<List<Pair<String, String>>>(emptyList())
+
     init {
-        io.execute {
-            val locs = db.getLocations()
-            main.post {
-                locations.value = locs
-                // follow the shared game state if it already has a location, else first
-                val fromState = GameStateRepository.state.value?.locationId
-                val initial = fromState ?: locs.firstOrNull()?.id
-                selectedLocationId.value = initial
-                loadFiltersFor(initial)
-            }
-        }
+        loadPackAndLocations()
         // keep in sync if OCR / another provider changes the location later
         encounters.addSource(GameStateRepository.state) { gs ->
             if (gs?.locationId != null && gs.locationId != selectedLocationId.value) {
                 selectLocation(gs.locationId)
+            }
+        }
+    }
+
+    private fun loadPackAndLocations() {
+        io.execute {
+            db.syncPack()
+            val locs = db.getLocations()
+            val active = db.activePackId()
+            val name = db.availablePacks().firstOrNull { it.first == active }?.second ?: active
+            val packs = db.availablePacks()
+            main.post {
+                packName.value = name
+                availablePacks.value = packs
+                locations.value = locs
+                val fromState = GameStateRepository.state.value?.locationId
+                val initial = fromState?.takeIf { id -> locs.any { it.id == id } } ?: locs.firstOrNull()?.id
+                selectedLocationId.value = initial
+                loadFiltersFor(initial)
+            }
+        }
+    }
+
+    /** Switch data packs (e.g. BDSP <-> Luminescent Platinum) and rebuild. */
+    fun selectPack(packId: String) {
+        io.execute {
+            db.setPackOverride(packId)
+            db.syncPack()
+            val locs = db.getLocations()
+            val active = db.activePackId()
+            val name = db.availablePacks().firstOrNull { it.first == active }?.second ?: active
+            main.post {
+                packName.value = name
+                methodFilter.value = emptySet()
+                timeFilter.value = emptySet()
+                uncaughtOnly.value = false
+                locations.value = locs
+                selectedLocationId.value = locs.firstOrNull()?.id
+                loadFiltersFor(locs.firstOrNull()?.id)
+                reload() // force refresh even if the location id is unchanged across packs
             }
         }
     }

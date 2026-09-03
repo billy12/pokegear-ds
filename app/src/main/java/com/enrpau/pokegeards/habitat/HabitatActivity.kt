@@ -32,6 +32,8 @@ class HabitatActivity : AppCompatActivity() {
     private lateinit var tvProgress: TextView
     private lateinit var tvEmpty: TextView
     private lateinit var chipUncaught: Chip
+    private lateinit var chipPack: Chip
+    private var packs: List<Pair<String, String>> = emptyList()
 
     private val adapter = EncounterAdapter(
         onToggleCaught = { row -> vm.setCaught(row.species.id, !row.isCaught) },
@@ -56,6 +58,8 @@ class HabitatActivity : AppCompatActivity() {
         chipUncaught.setOnCheckedChangeListener { _: CompoundButton, checked: Boolean ->
             vm.setUncaughtOnly(checked)
         }
+        chipPack = findViewById(R.id.chipPack)
+        chipPack.setOnClickListener { showPackChooser() }
 
         val span = (resources.configuration.screenWidthDp / 110).coerceIn(2, 6)
         rv.layoutManager = GridLayoutManager(this, span)
@@ -96,6 +100,23 @@ class HabitatActivity : AppCompatActivity() {
             tvEmpty.visibility = if (rows.isEmpty()) View.VISIBLE else View.GONE
         }
         vm.progress.observe(this) { tvProgress.text = it.text }
+
+        vm.packName.observe(this) { chipPack.text = it }
+        vm.availablePacks.observe(this) { packs = it }
+    }
+
+    private fun showPackChooser() {
+        if (packs.size < 2) return
+        val labels = packs.map { it.second }.toTypedArray()
+        val current = packs.indexOfFirst { it.second == chipPack.text }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.habitat_pack_title)
+            .setSingleChoiceItems(labels, current) { d, which ->
+                vm.selectPack(packs[which].first)
+                d.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun labelFor(loc: LocationRow): String =

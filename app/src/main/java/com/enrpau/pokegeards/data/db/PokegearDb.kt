@@ -25,6 +25,7 @@ class PokegearDb private constructor(private val context: Context) :
         const val DB_NAME = "pokegear.db"
         const val DB_VERSION = 1
         private const val TAG = "PokegearDb"
+        private const val KEY_PACK = "pack_id"
 
         @Volatile private var instance: PokegearDb? = null
         fun get(context: Context): PokegearDb =
@@ -36,34 +37,12 @@ class PokegearDb private constructor(private val context: Context) :
     // ---------------------------------------------------------------- schema
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL(
-            """CREATE TABLE pack (
-                 id TEXT PRIMARY KEY, name TEXT NOT NULL, mechanics TEXT NOT NULL,
-                 dex_count INTEGER NOT NULL, version TEXT NOT NULL, source_note TEXT )"""
-        )
-        db.execSQL(
-            """CREATE TABLE species (
-                 pack_id TEXT NOT NULL, id INTEGER NOT NULL, name TEXT NOT NULL,
-                 type1 TEXT NOT NULL, type2 TEXT,
-                 base_hp INTEGER, base_atk INTEGER, base_def INTEGER,
-                 base_spa INTEGER, base_spd INTEGER, base_spe INTEGER,
-                 sprite_key TEXT NOT NULL,
-                 PRIMARY KEY (pack_id, id) )"""
-        )
-        db.execSQL(
-            """CREATE TABLE location (
-                 pack_id TEXT NOT NULL, id INTEGER NOT NULL, name TEXT NOT NULL,
-                 region TEXT, map_group TEXT, sort_order INTEGER NOT NULL,
-                 PRIMARY KEY (pack_id, id) )"""
-        )
-        db.execSQL(
-            """CREATE TABLE encounter (
-                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                 pack_id TEXT NOT NULL, location_id INTEGER NOT NULL, species_id INTEGER NOT NULL,
-                 method TEXT NOT NULL, time_of_day TEXT NOT NULL, rate INTEGER,
-                 min_level INTEGER NOT NULL, max_level INTEGER NOT NULL, condition_note TEXT )"""
-        )
-        db.execSQL("CREATE INDEX idx_encounter_loc ON encounter(pack_id, location_id)")
+        createSchema(db)
+        importActivePack(db)
+    }
+
+    private fun createSchema(db: SQLiteDatabase) {
+        createSchemaFor(db)
         db.execSQL(
             """CREATE TABLE player_state (
                  pack_id TEXT NOT NULL, species_id INTEGER NOT NULL,
@@ -71,16 +50,63 @@ class PokegearDb private constructor(private val context: Context) :
                  note TEXT, updated_at INTEGER NOT NULL,
                  PRIMARY KEY (pack_id, species_id) )"""
         )
-
-        importActivePack(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        for (t in listOf("encounter", "location", "species", "player_state", "pack")) {
-            db.execSQL("DROP TABLE IF EXISTS $t")
-        }
+        dropContent(db)
+        db.execSQL("DROP TABLE IF EXISTS player_state")
         onCreate(db)
     }
+
+    private fun dropContent(db: SQLiteDatabase) {
+        for (t in listOf("encounter", "location", "species", "pack")) {
+            db.execSQL("DROP TABLE IF EXISTS $t")
+        }
+    }
+
+    /**
+     * Re-import if the resolved pack no longer matches what's loaded (the user
+     * switched packs). player_state is preserved — catch flags are keyed by
+     * (pack_id, species_id), so each pack keeps its own progress. Returns true
+     * if a rebuild happened. Call off the main thread.
+     */
+    fun syncPack(): Boolean {
+        val want = resolvePackId()
+        if (safeActivePackId() == want) return false
+        Log.d(TAG, "Pack change -> rebuilding as '$want'")
+        val db = writableDatabase
+        dropContent(db)
+        createSchemaFor(db)
+        importActivePack(db)
+        return true
+    }
+
+    /** createSchema minus player_state (kept across pack switches). */
+    private fun createSchemaFor(db: SQLiteDatabase) {
+        db.execSQL(
+            """CREATE TABLE pack ( id TEXT PRIMARY KEY, name TEXT NOT NULL, mechanics TEXT NOT NULL,
+                 dex_count INTEGER NOT NULL, version TEXT NOT NULL, source_note TEXT )"""
+        )
+        db.execSQL(
+            """CREATE TABLE species ( pack_id TEXT NOT NULL, id INTEGER NOT NULL, name TEXT NOT NULL,
+                 type1 TEXT NOT NULL, type2 TEXT, base_hp INTEGER, base_atk INTEGER, base_def INTEGER,
+                 base_spa INTEGER, base_spd INTEGER, base_spe INTEGER, sprite_key TEXT NOT NULL,
+                 PRIMARY KEY (pack_id, id) )"""
+        )
+        db.execSQL(
+            """CREATE TABLE location ( pack_id TEXT NOT NULL, id INTEGER NOT NULL, name TEXT NOT NULL,
+                 region TEXT, map_group TEXT, sort_order INTEGER NOT NULL, PRIMARY KEY (pack_id, id) )"""
+        )
+        db.execSQL(
+            """CREATE TABLE encounter ( id INTEGER PRIMARY KEY AUTOINCREMENT, pack_id TEXT NOT NULL,
+                 location_id INTEGER NOT NULL, species_id INTEGER NOT NULL, method TEXT NOT NULL,
+                 time_of_day TEXT NOT NULL, rate INTEGER, min_level INTEGER NOT NULL,
+                 max_level INTEGER NOT NULL, condition_note TEXT )"""
+        )
+        db.execSQL("CREATE INDEX idx_encounter_loc ON encounter(pack_id, location_id)")
+    }
+
+    private fun safeActivePackId(): String = try { activePackId() } catch (e: Exception) { "" }
 
     // ---------------------------------------------------------------- import
 
@@ -148,17 +174,36 @@ class PokegearDb private constructor(private val context: Context) :
         }
     }
 
-    /** "bdsp" if its species+encounters assets look complete, else "_bootstrap". */
+    /**
+     * The pack to load: an explicit user override if it's valid, else "bdsp" if
+     * its assets look complete, else "_bootstrap".
+     */
     private fun resolvePackId(): String {
-        return try {
-            val packs = context.assets.list("packs")?.toSet() ?: emptySet()
-            if ("bdsp" in packs &&
-                countLines("packs/bdsp/species.csv") > 100 &&
-                countLines("packs/bdsp/encounters.csv") > 15
-            ) "bdsp" else "_bootstrap"
-        } catch (e: Exception) {
-            "_bootstrap"
-        }
+        prefs().getString(KEY_PACK, null)?.let { if (packAssetsOk(it)) return it }
+        return if (packAssetsOk("bdsp")) "bdsp" else "_bootstrap"
+    }
+
+    private fun packAssetsOk(id: String): Boolean = try {
+        (context.assets.list("packs")?.toSet() ?: emptySet()).contains(id) &&
+            countLines("packs/$id/species.csv") > 5 &&
+            countLines("packs/$id/encounters.csv") > 3
+    } catch (e: Exception) {
+        false
+    }
+
+    private fun prefs() = context.getSharedPreferences("pokegear", Context.MODE_PRIVATE)
+
+    /** Packs with complete assets: (id, display name). */
+    fun availablePacks(): List<Pair<String, String>> {
+        val ids = try { context.assets.list("packs")?.toList() ?: emptyList() } catch (e: Exception) { emptyList() }
+        return ids.filter { packAssetsOk(it) }
+            .map { it to (readPackJson("packs/$it/pack.json")["name"] ?: it) }
+            .sortedBy { it.second }
+    }
+
+    /** Set the active pack. Caller then runs [syncPack] off the main thread. */
+    fun setPackOverride(id: String?) {
+        prefs().edit().apply { if (id == null) remove(KEY_PACK) else putString(KEY_PACK, id) }.apply()
     }
 
     private fun countLines(path: String): Int = try {
