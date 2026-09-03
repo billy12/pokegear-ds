@@ -203,6 +203,15 @@ class PokegearDb private constructor(private val context: Context) :
             .sortedBy { it.second }
     }
 
+    /** (packId, lowercase title keywords) for boot-time title-screen auto-detect. */
+    fun packTitleMatchers(): List<Pair<String, List<String>>> {
+        return availablePacks().mapNotNull { (id, _) ->
+            val raw = readPackJson("packs/$id/pack.json")["title_match"]?.lowercase()?.trim().orEmpty()
+            val kw = raw.split(",").map { it.trim() }.filter { it.length >= 4 }
+            if (kw.isEmpty()) null else id to kw
+        }
+    }
+
     /** Set the active pack. Caller then runs [syncPack] off the main thread. */
     fun setPackOverride(id: String?) {
         prefs().edit().apply { if (id == null) remove(KEY_PACK) else putString(KEY_PACK, id) }.apply()

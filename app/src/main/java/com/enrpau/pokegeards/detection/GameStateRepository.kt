@@ -3,6 +3,7 @@ package com.enrpau.pokegeards.detection
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 
 /**
  * Merges every [GameStateProvider] into one observable [GameState]
@@ -17,6 +18,11 @@ object GameStateRepository {
         private set
     var caughtTracker: CaughtTracker? = null
         private set
+    var titleDetector: TitleDetector? = null
+        private set
+
+    /** Emits a pack id when title-screen detection auto-switches the pack. */
+    val externalPackSwitch = MutableLiveData<String>()
 
     private val _state = MediatorLiveData<GameState>().apply {
         value = GameState(phase = GamePhase.OVERWORLD)
@@ -32,6 +38,10 @@ object GameStateRepository {
         val app = context.applicationContext
         ocr = OcrStateProvider(app).also { it.start() }
         caughtTracker = CaughtTracker(app).also { it.start() }
+        titleDetector = TitleDetector(app) { packId ->
+            onPackChanged()
+            externalPackSwitch.value = packId
+        }.also { it.start() }
 
         _state.addSource(manual.state) { recompute() }
         _state.addSource(bridge.state) { recompute() }

@@ -47,6 +47,8 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
     init {
         loadPackAndLocations()
         caughtPing?.let { encounters.addSource(it) { reload() } }
+        // title-screen detection already switched the DB pack; just re-load this screen
+        encounters.addSource(GameStateRepository.externalPackSwitch) { loadPackAndLocations() }
         // follow detection: OCR gives a pack location id directly; the Eden
         // bridge gives a raw ZoneID that we translate. Move only if the pack
         // actually has that area.

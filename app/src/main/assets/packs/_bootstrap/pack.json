@@ -4,5 +4,6 @@
   "mechanics": "GEN_6_PLUS",
   "dex_count": 493,
   "version": "2026.09.02",
+  "title_match": "",
   "source_note": "Hand-entered sample: 3 routes + Lake Verity, ~11 species. Real BDSP data. Superseded by the full 'bdsp' pack when present."
 }

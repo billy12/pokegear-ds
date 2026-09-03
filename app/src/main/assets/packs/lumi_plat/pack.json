@@ -4,5 +4,6 @@
   "mechanics": "GEN_6_PLUS",
   "dex_count": 513,
   "version": "2026.09.02",
+  "title_match": "luminescent platinum,luminescent",
   "source_note": "LP 3.0 data pack. id/name/type1/type2 from the fork's dex/luminescent_pokedex.csv (513 mons, LP type changes already applied). Base stats pulled from PokeAPI national-dex entries: LP mostly retains vanilla base stats, so LP-specific stat buffs/rebalances are NOT reflected here. Regional-form rows in luminescent_regional.csv are not split out; a regional form that shares a base national id is folded into that id for v1. Encounters + locations built from TeamLumi/luminescent-team __3.0gamedata/encounter_locations.json (the source behind the official LP route mapper): 158 zones, 4034 rows, walk/surf/rod/radar/swarm/day-night/incense. Incense Burner regional-form encounters are mapped to their base national id with the form named in condition_note. NOT included: Grand Underground tables, Honey Tree slots, static/legendary/gift encounters, roaming Pokemon (documented separately by LP and not in this dataset)."
 }

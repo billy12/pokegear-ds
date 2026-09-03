@@ -13,6 +13,7 @@ import android.view.accessibility.AccessibilityEvent
 import com.enrpau.pokegeards.data.RomManager
 import com.enrpau.pokegeards.detection.ACTION_CATCH_TEXT
 import com.enrpau.pokegeards.detection.ACTION_LOCATION_TEXT
+import com.enrpau.pokegeards.detection.ACTION_TITLE_TEXT
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -166,6 +167,12 @@ class DualDexAccessibilityService : AccessibilityService() {
         crop(bitmap, 0, (h * 0.72f).toInt(), w, (h * 0.28f).toInt())?.let { region ->
             recognizer.process(InputImage.fromBitmap(region, 0))
                 .addOnSuccessListener { vt -> broadcastText(ACTION_CATCH_TEXT, vt.text) }
+        }
+        // game title logo: centre ~60% wide, upper-middle band — only useful at
+        // boot; TitleDetector ignores it after its window closes
+        crop(bitmap, (w * 0.20f).toInt(), (h * 0.12f).toInt(), (w * 0.60f).toInt(), (h * 0.56f).toInt())?.let { region ->
+            recognizer.process(InputImage.fromBitmap(region, 0))
+                .addOnSuccessListener { vt -> broadcastText(ACTION_TITLE_TEXT, vt.text) }
         }
     }
 
