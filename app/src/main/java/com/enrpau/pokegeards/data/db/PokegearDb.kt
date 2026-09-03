@@ -286,6 +286,24 @@ class PokegearDb private constructor(private val context: Context) :
         return out
     }
 
+    /** (species id, name) for the active pack — for fuzzy-matching OCR text. */
+    fun speciesNames(): List<Pair<Int, String>> {
+        val pack = activePackId()
+        val out = ArrayList<Pair<Int, String>>()
+        readableDatabase.rawQuery(
+            "SELECT id,name FROM species WHERE pack_id=?", arrayOf(pack)
+        ).use { c -> while (c.moveToNext()) out.add(c.getInt(0) to c.getString(1)) }
+        return out
+    }
+
+    fun isCaught(speciesId: Int): Boolean {
+        val pack = activePackId()
+        readableDatabase.rawQuery(
+            "SELECT is_caught FROM player_state WHERE pack_id=? AND species_id=?",
+            arrayOf(pack, speciesId.toString())
+        ).use { c -> return c.moveToFirst() && c.getInt(0) == 1 }
+    }
+
     /** Map a raw in-game ZoneID (from the emulator bridge) to this pack's location id. */
     fun locationForZone(zoneId: Int): Int? {
         val pack = activePackId()

@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
+    private val caughtCheckExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
 
     // ui references
     private lateinit var tvName: TextView
@@ -234,6 +235,19 @@ class MainActivity : AppCompatActivity() {
         val displayName = if (pokemon.variantLabel != null) "$cleanName (${pokemon.variantLabel})" else cleanName
 
         tvName.text = displayName
+        tvName.tag = pokemon.id
+        // caught indicator (per active pack) — checked off the main thread
+        val speciesId = pokemon.id
+        caughtCheckExecutor.execute {
+            val caught = try {
+                com.enrpau.pokegeards.data.db.PokegearDb.get(this).isCaught(speciesId)
+            } catch (e: Exception) { false }
+            runOnUiThread {
+                if (tvName.tag == speciesId) {
+                    tvName.text = (if (caught) "✔ " else "") + displayName
+                }
+            }
+        }
         tvId.text = String.format("#%03d", pokemon.id)
         tvName.setTextColor(theme.headerTextColor)
         tvId.setTextColor(theme.subTextColor)

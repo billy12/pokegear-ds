@@ -11,6 +11,8 @@ import android.os.Looper
 import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import com.enrpau.pokegeards.data.RomManager
+import com.enrpau.pokegeards.detection.ACTION_CATCH_TEXT
+import com.enrpau.pokegeards.detection.ACTION_LOCATION_TEXT
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -86,6 +88,7 @@ class DualDexAccessibilityService : AccessibilityService() {
 
                 if (bitmap != null) {
                     processImage(bitmap)
+                    processExtraCrops(bitmap)   // route banner + catch dialogue (fire-and-forget)
                 } else {
                     isScanning = false
                 }
@@ -142,6 +145,41 @@ class DualDexAccessibilityService : AccessibilityService() {
         } catch (e: Exception) {
             isScanning = false
         }
+    }
+
+    /**
+     * Extra OCR passes on the same screenshot, independent of the battle
+     * scanner: the area-name banner (top-left) and the catch dialogue (bottom).
+     * These only broadcast raw text; matching happens in the receivers, which
+     * have the active data pack. Fire-and-forget — they don't gate the loop.
+     */
+    private fun processExtraCrops(bitmap: Bitmap) {
+        val w = bitmap.width
+        val h = bitmap.height
+
+        // area-name banner: top-left ~half width, top ~18%
+        crop(bitmap, 0, 0, (w * 0.55f).toInt(), (h * 0.20f).toInt())?.let { region ->
+            recognizer.process(InputImage.fromBitmap(region, 0))
+                .addOnSuccessListener { vt -> broadcastText(ACTION_LOCATION_TEXT, vt.text) }
+        }
+        // catch dialogue: bottom ~28%, full width
+        crop(bitmap, 0, (h * 0.72f).toInt(), w, (h * 0.28f).toInt())?.let { region ->
+            recognizer.process(InputImage.fromBitmap(region, 0))
+                .addOnSuccessListener { vt -> broadcastText(ACTION_CATCH_TEXT, vt.text) }
+        }
+    }
+
+    private fun crop(src: Bitmap, x: Int, y: Int, cw: Int, ch: Int): Bitmap? = try {
+        if (cw <= 0 || ch <= 0 || x + cw > src.width || y + ch > src.height) null
+        else Bitmap.createBitmap(src, x, y, cw, ch)
+    } catch (e: Exception) { null }
+
+    private fun broadcastText(action: String, text: String) {
+        if (text.isBlank()) return
+        sendBroadcast(Intent(action).apply {
+            setPackage(packageName)
+            putExtra("TEXT", text)
+        })
     }
 
     private fun processOcrResult(rawText: String) {

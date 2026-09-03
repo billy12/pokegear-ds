@@ -41,14 +41,19 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
     val packName = MutableLiveData("")
     val availablePacks = MutableLiveData<List<Pair<String, String>>>(emptyList())
 
+    /** bumps when auto-catch marks something, so the grid re-queries */
+    val caughtPing = GameStateRepository.caughtTracker?.lastEvent
+
     init {
         loadPackAndLocations()
-        // follow the Eden bridge: translate its raw ZoneID to this pack's
-        // location id, and only move if the pack actually has that area
+        caughtPing?.let { encounters.addSource(it) { reload() } }
+        // follow detection: OCR gives a pack location id directly; the Eden
+        // bridge gives a raw ZoneID that we translate. Move only if the pack
+        // actually has that area.
         encounters.addSource(GameStateRepository.state) { gs ->
-            val zone = gs?.zoneId ?: return@addSource
+            gs ?: return@addSource
             io.execute {
-                val locId = db.locationForZone(zone) ?: return@execute
+                val locId = gs.locationId ?: gs.zoneId?.let { db.locationForZone(it) } ?: return@execute
                 main.post {
                     if (locId != selectedLocationId.value && locations.value.orEmpty().any { it.id == locId }) {
                         selectLocation(locId)
@@ -82,6 +87,7 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
         io.execute {
             db.setPackOverride(packId)
             db.syncPack()
+            GameStateRepository.onPackChanged()
             val locs = db.getLocations()
             val active = db.activePackId()
             val name = db.availablePacks().firstOrNull { it.first == active }?.second ?: active
