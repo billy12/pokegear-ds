@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex.data
+package com.enrpau.pokegeards.data
 
 import android.content.Context
 import android.util.Log // Import Logging

@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.content.ContentValues
 import android.content.Context

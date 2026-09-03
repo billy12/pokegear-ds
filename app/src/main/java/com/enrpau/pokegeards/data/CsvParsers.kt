@@ -1,8 +1,8 @@
-package com.enrpau.dualscreendex.data
+package com.enrpau.pokegeards.data
 
 import android.content.Context
-import com.enrpau.dualscreendex.Pokemon
-import com.enrpau.dualscreendex.PokemonType
+import com.enrpau.pokegeards.Pokemon
+import com.enrpau.pokegeards.PokemonType
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader

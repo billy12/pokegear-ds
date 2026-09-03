@@ -1,6 +1,6 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
-import com.enrpau.dualscreendex.data.RomProfile
+import com.enrpau.pokegeards.data.RomProfile
 
 object GenerationHelper {
 

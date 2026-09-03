@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
@@ -10,7 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.Display
 import android.view.accessibility.AccessibilityEvent
-import com.enrpau.dualscreendex.data.RomManager
+import com.enrpau.pokegeards.data.RomManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -169,7 +169,7 @@ class DualDexAccessibilityService : AccessibilityService() {
             }
         }
 
-        val intent = Intent("com.enrpau.dualscreendex.POKEMON_DETECTED")
+        val intent = Intent("com.enrpau.pokegeards.POKEMON_DETECTED")
         intent.setPackage(packageName) // ensures only this app receives the broadcast
 
         if (foundNames.isNotEmpty()) {

@@ -1,11 +1,11 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.enrpau.dualscreendex.data.RomManager
-import com.enrpau.dualscreendex.data.RomProfile
+import com.enrpau.pokegeards.data.RomManager
+import com.enrpau.pokegeards.data.RomProfile
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 

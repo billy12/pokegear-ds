@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.content.Context
 import android.graphics.Canvas

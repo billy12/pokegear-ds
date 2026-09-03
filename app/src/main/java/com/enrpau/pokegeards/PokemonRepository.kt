@@ -1,8 +1,8 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.content.Context
-import com.enrpau.dualscreendex.data.CsvParsers
-import com.enrpau.dualscreendex.data.RomManager
+import com.enrpau.pokegeards.data.CsvParsers
+import com.enrpau.pokegeards.data.RomManager
 
 class PokemonRepository(private val context: Context) {
 

@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.content.Context
 import android.content.Intent
@@ -15,8 +15,8 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import androidx.core.content.edit
-import com.enrpau.dualscreendex.data.RomManager
-import com.enrpau.dualscreendex.data.RomProfile
+import com.enrpau.pokegeards.data.RomManager
+import com.enrpau.pokegeards.data.RomProfile
 import androidx.recyclerview.widget.RecyclerView
 
 class SettingsActivity : AppCompatActivity() {

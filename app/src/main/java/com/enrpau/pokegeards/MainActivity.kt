@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -280,7 +280,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.refreshSettings()
         applyThemeColors()
         if (::adapter.isInitialized) {
-            val currentMechanics = com.enrpau.dualscreendex.data.RomManager.currentProfile.baseMechanics
+            val currentMechanics = com.enrpau.pokegeards.data.RomManager.currentProfile.baseMechanics
             val currentTheme = ThemeManager.currentTheme
             adapter.updateSettings(currentMechanics, currentTheme)
             val freshList = viewModel.repository.getAllPokemon()
@@ -334,7 +334,7 @@ class MainActivity : AppCompatActivity() {
         searchBox.setEndIconTintList(android.content.res.ColorStateList.valueOf(iconColor))
 
         if (::adapter.isInitialized) {
-            val currentMechanics = com.enrpau.dualscreendex.data.RomManager.currentProfile.baseMechanics
+            val currentMechanics = com.enrpau.pokegeards.data.RomManager.currentProfile.baseMechanics
             adapter.updateSettings(currentMechanics, theme)
         }
     }
@@ -415,7 +415,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         loadSettings()
 
-        val filter = IntentFilter("com.enrpau.dualscreendex.POKEMON_DETECTED")
+        val filter = IntentFilter("com.enrpau.pokegeards.POKEMON_DETECTED")
         ContextCompat.registerReceiver(this, pokemonReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 

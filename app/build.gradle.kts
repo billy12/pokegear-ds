@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "com.enrpau.dualscreendex"
+    namespace = "com.enrpau.pokegeards"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.enrpau.dualscreendex"
+        applicationId = "com.enrpau.pokegeards"
         minSdk = 30
         targetSdk = 36
         versionCode = 1

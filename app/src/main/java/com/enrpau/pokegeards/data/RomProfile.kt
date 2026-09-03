@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex.data
+package com.enrpau.pokegeards.data
 
 import java.io.File
 

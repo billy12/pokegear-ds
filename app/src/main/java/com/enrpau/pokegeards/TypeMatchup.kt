@@ -1,10 +1,10 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.content.Context
 import android.util.Log
-import com.enrpau.dualscreendex.data.CsvParsers
-import com.enrpau.dualscreendex.data.RomManager
-import com.enrpau.dualscreendex.data.RomProfile
+import com.enrpau.pokegeards.data.CsvParsers
+import com.enrpau.pokegeards.data.RomManager
+import com.enrpau.pokegeards.data.RomProfile
 
 object TypeMatchup {
 

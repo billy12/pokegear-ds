@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import android.graphics.drawable.GradientDrawable
 import androidx.core.graphics.ColorUtils
-import com.enrpau.dualscreendex.data.RomProfile
+import com.enrpau.pokegeards.data.RomProfile
 
 class PokemonAdapter(
     private var fullList: List<Pokemon>,

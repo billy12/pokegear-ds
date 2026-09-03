@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

@@ -1,4 +1,4 @@
-package com.enrpau.dualscreendex
+package com.enrpau.pokegeards
 
 import android.net.Uri
 import android.os.Bundle
@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.enrpau.dualscreendex.data.RomManager
-import com.enrpau.dualscreendex.data.RomProfile
+import com.enrpau.pokegeards.data.RomManager
+import com.enrpau.pokegeards.data.RomProfile
 import com.google.android.material.button.MaterialButton
 import java.io.File
 import java.io.FileOutputStream
