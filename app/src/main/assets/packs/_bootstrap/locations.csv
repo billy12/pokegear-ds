@@ -1,0 +1,5 @@
+id,name,region,map_group,sort_order
+1,Route 201,Sinnoh,Overworld,201
+2,Route 202,Sinnoh,Overworld,202
+3,Route 203,Sinnoh,Overworld,203
+4,Lake Verity,Sinnoh,Water,900

@@ -27,4 +27,19 @@
     <string name="_001">#001</string>
     <string name="fire2">FIRE</string>
     <string name="_2">× 2</string>
+
+    <!-- Habitat / Route tracker -->
+    <string name="habitat_title">Habitat</string>
+    <string name="open_habitat">🌿 Habitat</string>
+    <string name="habitat_location_label">AREA</string>
+    <string name="habitat_progress_placeholder">0 / 0 caught here</string>
+    <string name="habitat_empty">No encounters match these filters.</string>
+    <string name="habitat_hint">Tap a Pokémon to mark it caught · long-press for details</string>
+    <string name="habitat_sprite_desc">Pokémon sprite</string>
+    <string name="habitat_level_placeholder">Lv 2–3</string>
+    <string name="habitat_method_placeholder">Grass</string>
+    <string name="habitat_rate_placeholder">50%</string>
+    <string name="habitat_meta_placeholder">Grass · Day\nLv 2–3 · 50%</string>
+    <string name="habitat_stats_placeholder">HP 45  ATK 49  DEF 49</string>
+    <string name="habitat_close">Close</string>
 </resources>

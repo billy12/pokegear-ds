@@ -90,6 +90,10 @@ class MainActivity : AppCompatActivity() {
         setupListeners()
         loadSettings()
 
+        findViewById<View>(R.id.btnOpenHabitat).setOnClickListener {
+            startActivity(Intent(this, com.enrpau.pokegeards.habitat.HabitatActivity::class.java))
+        }
+
         viewModel.displayedPokemon.observeForeverSafe { pokemon ->
             updateCardUI(pokemon)
         }

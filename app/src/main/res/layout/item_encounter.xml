@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="8dp">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/encSprite"
+                android:layout_width="64dp"
+                android:layout_height="56dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/habitat_sprite_desc" />
+
+            <View
+                android:id="@+id/encCaughtDot"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_caught_dot"
+                android:visibility="invisible" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/encName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="@string/bulbasaur"
+            android:textColor="#3E2723"
+            android:textStyle="bold"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/encLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/habitat_level_placeholder"
+            android:textColor="#6D4C41"
+            android:textSize="11sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="2dp">
+
+            <TextView
+                android:id="@+id/encMethodTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/habitat_method_placeholder"
+                android:textColor="#FFFFFF"
+                android:textSize="9sp"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="1dp"
+                android:background="@drawable/bg_method_tag" />
+
+            <TextView
+                android:id="@+id/encRate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/habitat_rate_placeholder"
+                android:textColor="#8D6E63"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginStart="6dp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
