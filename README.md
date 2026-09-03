@@ -1,115 +1,128 @@
-# DualScreenDex
+# PokéGear DS
 
-**DualScreenDex** is a companion Pokedex app designed specifically for dual-screen Android gaming handhelds (like the Ayn Thor). It uses live OCR screen scanning to automatically detect the Pokémon currently on your screen and display their stats, weaknesses, and resistances instantly.
+**PokéGear DS** is a companion app for dual-screen Android gaming handhelds — built
+for the **AYN Thor**. It runs on the lower touchscreen while a Pokémon game plays
+on the main screen, and answers three questions in real time without breaking
+immersion:
 
----
+1. **Where am I, and what lives here?** — a habitat / route encounter tracker.
+2. **Who am I fighting right now?** — live battle type-effectiveness analysis.
+3. **What am I still missing from this area?** — caught / uncaught checklists with
+   the exact encounter conditions (method, time of day, rate, level range).
 
-## New in v2.0
+Modelled on the HeartGold/SoulSilver bottom-screen PokéGear / Pokédex Habitat mode.
+First-class support for **Brilliant Diamond / Shining Pearl** and **Luminescent
+Platinum**.
 
-* **Modular Architecture:** Complete internal refactor replacing the previous monolithic system with a cleaner, more scalable modular structure.
-* **Custom ROM Profiles:**
-  * Built-in profiles for:
-    * Vanilla Pokémon (Gen 1)
-    * Vanilla Pokémon (Gen 2–5)
-    * Vanilla Pokémon (Gen 6+)
-    * Luminescent Platinum
-    * Radical Red
-  * Create fully custom profiles by uploading your own `.csv` files:
-    * Custom Pokédex data
-    * Regional variants
-    * Type matchup logic
-    * Designed to support any ROM hack or custom game.
-* **Advanced Screen Scanning:**
-  * Choose whether to scan the **top or bottom screen**.
-  * Select scanning orientation (**left side or right side**) depending on how your game displays enemy Pokémon.
-  * Ideal for different emulator layouts and custom ROM UI designs.
+> Forked from [enrique-paulino/DualScreenDex](https://github.com/enrique-paulino/DualScreenDex)
+> (MIT), which contributes the OCR battle scanner and the ROM-profile / CSV system.
+> PokéGear DS adds the habitat tracker, an encounter/location data model, and
+> per-game data packs.
 
 ---
 
-## Features
+## Feature pillars
 
-* **Live Battle Scanner:** Uses Android's AccessibilityService and Google ML Kit to scan the selected screen region for Pokémon names in real-time.
-* **Themes (introduced in v1.1):**
-  * **OLED Mode:** True black background for OLED screens.
-  * **Pokedex Red:** Classic green-tinted aesthetic with scanlines.
-  * **Pastel Magic:** Pastel gradients with floating stars.
-  * **Dynamic:** Adapts UI colours based on the detected Pokémon's type.
-* **Smart Multitasking:**
-    * **Battle Mode:** Automatically displays data for the Pokémon detected on screen (supports multi-Pokémon battles e.g. 2v2, 3v3).
-    * **Pokedex Mode:** Browse the full database manually.
-    * **"Battle Tab":** Minimises active battle data to a small tab at the bottom while you browse, allowing you to multitask without losing your place.
-* **Generation Selector:** Dynamic type system allows you to switch between logic for Gen 1, Gen 2–5, and Gen 6+ (e.g. retrofitting Fairy types back to Normal for older games).
-* **Battery Optimised:**
-    * Scanner automatically sleeps (`onPause`) when the app is backgrounded.
-    * Uses a dynamic polling rate (2000ms) to minimise CPU usage and heat.
-    * Crops image processing to the selected game window region to save resources.
- 
-* **Database Features**
-   * **Regional Variants:** Full support for **Alolan, Galarian and Hisuian** forms.
-   * **Form Switching:** A toggle button appears automatically when a Pokémon has multiple forms.
-   * **Offline Ready:** Includes a complete database of all 1,025 Pokémon.
+### Habitat & Route tracker (core)
 
----
+* **Encounter grid** for the current area — every species that can appear, from a
+  local SQLite database.
+* **Catch-status matrix** — caught species in full colour with a level range;
+  uncaught ones as dimmed silhouettes. Tap to toggle; it persists.
+* **Filters** by encounter method (Grass, Surf, the fishing rods, Rock Smash,
+  PokéRadar, Swarm, Grand Underground…) and time of day, plus an "uncaught only"
+  toggle.
+* **Encounter card** (long-press) — rate, level range, spawn conditions, base
+  stats, types.
+* **Per-area progress** ("17 / 24 caught here").
+* **Swappable data packs** — BDSP and Luminescent Platinum ship built in; each
+  keeps its own catch progress.
 
-## Roadmap
+### Live battle context (from DualScreenDex)
 
-* [x] **Custom ROM Support:** Import `.csv` files to support ROM hacks.
-* [x] **Custom Matchup Logic:** User-defined type effectiveness charts (e.g. changing Fire to be weak against Ice).
-* [x] **v1.1:** Themes, regional variants, and improved scanning.
-* [x] **v2.0:** Modular architecture, custom ROM profiles, advanced screen scanning controls.
-* [ ] **Language Support:** Support for non-English languages that have different Pokémon names (e.g. Japanese).
-* [ ] **TTS:** Have the app read out Pokémon entries in a Pokédex-robot voice.
+* OCR battle scanner (AccessibilityService + Google ML Kit) identifies the
+  opposing Pokémon and shows defensive weaknesses / resistances.
+* Supports multi-Pokémon battles, generation-specific type logic, and custom
+  matchup charts.
+
+### Lower-screen UX
+
+* Touch-optimised, non-blocking layout for a secondary landscape strip.
+* OLED / battery-friendly: the scanner sleeps when backgrounded and polls on a
+  timer.
 
 ---
 
-## Demo Video
+## How location detection works
 
-<a href="https://www.youtube.com/watch?v=JMTiW8wY358">
-  <video src="https://github.com/user-attachments/assets/7e5c7c09-2865-4e57-9b8e-76198134f4fb" width="400" controls muted autoplay loop>
-  </video>
-</a>
+The data engine is **detection-agnostic** — the UI takes a `location_id` and
+`active_species_id` from a shared state provider, and any of these can feed it:
 
----
+| Tier | Method | Status |
+| --- | --- | --- |
+| Manual | A sticky location picker on the lower screen | **working** |
+| OCR | Read the in-game area banner on zone entry, fuzzy-match against the pack's location list | planned |
+| Emulator bridge | Speak the GDB Remote Serial Protocol to Eden's debug stub (`localhost:6543`) and read game RAM directly | investigating — feasible (Eden inherits Yuzu's GDB stub) |
 
-## Screenshots
-
-| Dynamic Theme | OLED Theme | Pokemon Red Theme | Pastel Magic Theme |
-|:---:|:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/098a89e0-bafb-48f0-b330-0c7fb881911e" width="200" /> | <img src="https://github.com/user-attachments/assets/7f922481-6fd7-4688-b9da-d0dc99cf9177" width="200" /> | <img src="https://github.com/user-attachments/assets/21c2bafa-c446-4ed8-93bb-4437cdc17adf" width="200" /> | <img src="https://github.com/user-attachments/assets/f5a0858e-13ab-48e0-88c7-0ef487a65850" width="200" /> |
-| <img src="https://github.com/user-attachments/assets/35895897-4248-483e-89e6-0b6a5c1dbf07" width="200" /> | <img src="https://github.com/user-attachments/assets/e16ea13b-265e-4cec-9111-a7290afd43ac" width="200" /> | <img src="https://github.com/user-attachments/assets/bb7c675f-f7b5-4631-a6f2-9dfac91a92a3" width="200" /> | <img src="https://github.com/user-attachments/assets/2e147b3d-0f34-4632-97fb-20150ed458ab" width="200" /> |
+See [`docs/NEXT.md`](docs/NEXT.md) for the roadmap.
 
 ---
 
-## CSV Formats
-- **Pokedex CSV:** `id,name,type1,type2` [e.g. vanilla pokedex](https://github.com/enrique-paulino/DualScreenDex/blob/master/app/src/main/assets/dex/vanilla_pokedex.csv)
-- **Regional Forms CSV:** `id,region,type1,type2` [e.g. vanilla regional](https://github.com/enrique-paulino/DualScreenDex/blob/master/app/src/main/assets/dex/vanilla_regional.csv)
-- **Matchup CSV:** [Standard matchup chart](https://github.com/enrique-paulino/DualScreenDex/blob/master/app/src/main/assets/dex/vanilla_matchup.csv) 
+## Data packs
+
+A pack is one game's data as CSV, under `app/src/main/assets/packs/<id>/`:
+
+```
+species.csv    id,name,type1,type2,base_hp,base_atk,base_def,base_spa,base_spd,base_spe,sprite_key
+locations.csv  id,name,region,map_group,sort_order
+encounters.csv location_id,species_id,method,time_of_day,rate,min_level,max_level,condition_note
+pack.json      { id, name, mechanics, dex_count, version, source_note }
+```
+
+Built in:
+
+* **`bdsp`** — 493 species, 73 Sinnoh locations, 1161 encounters (PokéAPI
+  Diamond/Pearl tables; Grand Underground is approximate).
+* **`lumi_plat`** — 513 species, 158 locations, 4034 encounters, from the LP 3.0
+  gamedata behind [luminescent.team/mapper](https://luminescent.team/mapper).
+
+Schema and pack format live in the design docs (see below).
 
 ---
 
-## Installation
-
-1. Download the latest APK from the [Releases](../../releases) page.
-2. Install the APK on your Android device.
-3. You will be prompted to enable **DualScreenDex** in your Android **Accessibility Settings**.
-    * *Note: This permission is used strictly to read the screen content for local text recognition. No images are saved or transmitted off-device.*
-
----
-
-## Tech Stack
+## Tech stack
 
 * **Language:** Kotlin
-* **UI:** XML Layouts / Material Design
-* **OCR:** Google ML Kit (On-Device Text Recognition)
-* **Database:** SQLite (Pre-populated asset)
-* **Architecture (v2.0):** Modular structure using `AccessibilityService` and Global `BroadcastReceiver`
+* **UI:** XML layouts / Material 3, MVVM (`ViewModel` + `LiveData`)
+* **OCR:** Google ML Kit (on-device)
+* **Data:** SQLite (`android.database.sqlite`), CSV-seeded on first launch
+* **Detection:** `AccessibilityService` + a shared `GameStateProvider`
+
+Design docs (PRD, technical design, schema, data-pack format) are kept in a
+separate planning repo, summarised in [`docs/NEXT.md`](docs/NEXT.md).
+
+---
+
+## Building
+
+```
+./gradlew assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+Needs JDK 17+ and the Android SDK (compileSdk 36, minSdk 30).
 
 ---
 
 ## License
 
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE). Inherited from DualScreenDex.
+
+Bundled sprite icons are from the PokéAPI sprites collection (fan-sourced game
+rips, used here as a placeholder under fair use).
 
 ---
 
-*Disclaimer: DualScreenDex is an unofficial, free fan-made app and is NOT affiliated, endorsed, or supported by Nintendo, Game Freak, or The Pokémon Company in any way. Pokémon and Pokémon character names are trademarks of Nintendo.*
+*Disclaimer: PokéGear DS is an unofficial, free, fan-made app and is NOT
+affiliated with, endorsed, or supported by Nintendo, Game Freak, or The Pokémon
+Company. Pokémon and Pokémon character names are trademarks of Nintendo.*
