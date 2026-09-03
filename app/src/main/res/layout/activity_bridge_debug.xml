@@ -66,6 +66,36 @@
         android:textSize="12sp"
         android:fontFamily="monospace" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp">
+
+        <Button
+            android:id="@+id/brFeed"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="▶ Feed Habitat" />
+
+        <Button
+            android:id="@+id/brFeedStop"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="■ Stop feed" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/brFeedStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="feed: idle"
+        android:textColor="#B8E0B8"
+        android:textSize="12sp"
+        android:fontFamily="monospace" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.enrpau.pokegeards.R
+import com.enrpau.pokegeards.detection.GameStateRepository
 import com.enrpau.pokegeards.detection.GdbRspClient
 import java.util.concurrent.Executors
 
@@ -31,6 +32,7 @@ class BridgeDebugActivity : AppCompatActivity() {
     private lateinit var len: EditText
     private lateinit var watch: CheckBox
     private lateinit var status: TextView
+    private lateinit var feedStatus: TextView
     private lateinit var log: TextView
 
     private val watchRunnable = object : Runnable {
@@ -53,12 +55,24 @@ class BridgeDebugActivity : AppCompatActivity() {
         len = findViewById(R.id.brLen)
         watch = findViewById(R.id.brWatch)
         status = findViewById(R.id.brStatus)
+        feedStatus = findViewById(R.id.brFeedStatus)
         log = findViewById(R.id.brLog)
 
         findViewById<Button>(R.id.brConnect).setOnClickListener { connect() }
         findViewById<Button>(R.id.brDisconnect).setOnClickListener { disconnect() }
         findViewById<Button>(R.id.brRead).setOnClickListener { doRead(quiet = false) }
         watch.setOnCheckedChangeListener { _, on -> if (on) main.post(watchRunnable) }
+
+        findViewById<Button>(R.id.brFeed).setOnClickListener {
+            // hand the single stub connection to the provider
+            io.execute { client?.close(); client = null }
+            disconnect()
+            GameStateRepository.startBridge()
+            append("feeding Habitat — open the Habitat screen to see it follow")
+        }
+        findViewById<Button>(R.id.brFeedStop).setOnClickListener { GameStateRepository.stopBridge() }
+        GameStateRepository.bridge.status.observe(this) { feedStatus.text = "feed: $it" }
+        GameStateRepository.bridge.detail.observe(this) { d -> if (d.isNotBlank()) feedStatus.text = "feed: ${GameStateRepository.bridge.status.value} · $d" }
     }
 
     override fun onDestroy() {

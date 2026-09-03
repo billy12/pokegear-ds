@@ -43,10 +43,17 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         loadPackAndLocations()
-        // keep in sync if OCR / another provider changes the location later
+        // follow the Eden bridge: translate its raw ZoneID to this pack's
+        // location id, and only move if the pack actually has that area
         encounters.addSource(GameStateRepository.state) { gs ->
-            if (gs?.locationId != null && gs.locationId != selectedLocationId.value) {
-                selectLocation(gs.locationId)
+            val zone = gs?.zoneId ?: return@addSource
+            io.execute {
+                val locId = db.locationForZone(zone) ?: return@execute
+                main.post {
+                    if (locId != selectedLocationId.value && locations.value.orEmpty().any { it.id == locId }) {
+                        selectLocation(locId)
+                    }
+                }
             }
         }
     }

@@ -7,7 +7,10 @@ import androidx.lifecycle.LiveData
  * picker, or a future emulator bridge — feeds this same shape.
  */
 data class GameState(
+    /** App-canonical pack location id (set by the manual picker). */
     val locationId: Int? = null,
+    /** Raw in-game ZoneID (set by the emulator bridge); the consumer maps it to a pack location. */
+    val zoneId: Int? = null,
     val activeSpeciesIds: List<Int> = emptyList(),
     val phase: GamePhase = GamePhase.UNKNOWN,
 )

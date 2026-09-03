@@ -23,7 +23,7 @@ class PokegearDb private constructor(private val context: Context) :
 
     companion object {
         const val DB_NAME = "pokegear.db"
-        const val DB_VERSION = 1
+        const val DB_VERSION = 2   // v2: location.zone_id
         private const val TAG = "PokegearDb"
         private const val KEY_PACK = "pack_id"
 
@@ -95,7 +95,8 @@ class PokegearDb private constructor(private val context: Context) :
         )
         db.execSQL(
             """CREATE TABLE location ( pack_id TEXT NOT NULL, id INTEGER NOT NULL, name TEXT NOT NULL,
-                 region TEXT, map_group TEXT, sort_order INTEGER NOT NULL, PRIMARY KEY (pack_id, id) )"""
+                 region TEXT, map_group TEXT, sort_order INTEGER NOT NULL, zone_id INTEGER,
+                 PRIMARY KEY (pack_id, id) )"""
         )
         db.execSQL(
             """CREATE TABLE encounter ( id INTEGER PRIMARY KEY AUTOINCREMENT, pack_id TEXT NOT NULL,
@@ -151,6 +152,7 @@ class PokegearDb private constructor(private val context: Context) :
                     put("region", c["region"])
                     put("map_group", c["map_group"])
                     put("sort_order", c["sort_order"]?.toIntOrNull() ?: c["id"]!!.toInt())
+                    put("zone_id", c["zone_id"]?.toIntOrNull())
                 })
             }
             forEachCsvRow("$base/encounters.csv") { c ->
@@ -282,6 +284,15 @@ class PokegearDb private constructor(private val context: Context) :
             }
         }
         return out
+    }
+
+    /** Map a raw in-game ZoneID (from the emulator bridge) to this pack's location id. */
+    fun locationForZone(zoneId: Int): Int? {
+        val pack = activePackId()
+        readableDatabase.rawQuery(
+            "SELECT id FROM location WHERE pack_id=? AND (zone_id=? OR (zone_id IS NULL AND id=?)) LIMIT 1",
+            arrayOf(pack, zoneId.toString(), zoneId.toString())
+        ).use { c -> return if (c.moveToFirst()) c.getInt(0) else null }
     }
 
     /** Methods present at a location, in a stable display order. */

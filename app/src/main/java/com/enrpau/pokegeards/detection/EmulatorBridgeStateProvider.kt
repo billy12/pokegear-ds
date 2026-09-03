@@ -8,13 +8,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Tier 3 detection (design.md §2.2): read game state straight from Eden's RAM
- * over the GDB stub.
+ * over the GDB stub. Confirmed working on BDSP v1.3.0 — see [BdspAddresses].
  *
- * Skeleton. The protocol + connection are proven ([GdbRspClient]); what's still
- * missing is the per-game address map (zone id, wild encounter, battle flag).
- * Until [BdspAddresses] / an LP map are filled in, this connects, boots the
- * game, and reports status, but emits no real GameState. Use BridgeDebugActivity
- * to hunt the addresses.
+ * Eden halts the game at the loader until a client connects and continues, so
+ * [start] sends `c` to boot it, then polls: every [pollMs] it interrupts the
+ * guest, follows the ZoneID and SceneID pointer chains, and continues.
  */
 class EmulatorBridgeStateProvider(
     private val host: String = "127.0.0.1",
@@ -35,9 +33,6 @@ class EmulatorBridgeStateProvider(
     private val io = Executors.newSingleThreadExecutor()
     private val running = AtomicBoolean(false)
 
-    /** Address map for the active pack; empty until reverse-engineered. */
-    var addresses: GameAddresses? = null
-
     override fun start() {
         if (running.getAndSet(true)) return
         status.postValue(Status.CONNECTING)
@@ -45,10 +40,11 @@ class EmulatorBridgeStateProvider(
             try {
                 val modules = client.connect()
                 val main = modules.firstOrNull { it.name.endsWith(".nss") } ?: modules.firstOrNull()
-                moduleBase.postValue(main?.base ?: 0L)
-                detail.postValue(modules.joinToString("\n") { "${it.name}  0x${it.base.toString(16)}" })
+                val base = main?.base ?: 0L
+                moduleBase.postValue(base)
+                detail.postValue("main = 0x${base.toString(16)}")
                 status.postValue(Status.RUNNING)
-                pollLoop(main?.base ?: 0L)
+                pollLoop(base)
             } catch (e: Exception) {
                 Log.e(TAG, "bridge start failed", e)
                 detail.postValue(e.message ?: e.toString())
@@ -64,32 +60,35 @@ class EmulatorBridgeStateProvider(
     }
 
     private fun pollLoop(mainBase: Long) {
-        val addr = addresses
+        if (mainBase == 0L) { status.postValue(Status.ERROR); running.set(false); return }
+        var lastLog = ""
         while (running.get()) {
             try {
-                if (addr != null) {
-                    val gs = client.withHalted { c ->
-                        GameState(
-                            locationId = c.readU32(mainBase + addr.zoneId).toInt().takeIf { it > 0 },
-                            activeSpeciesIds = addr.readActiveSpecies(c, mainBase),
-                            phase = if (c.readU32(mainBase + addr.battleFlag) != 0L) GamePhase.BATTLE else GamePhase.OVERWORLD,
-                        )
-                    }
-                    _state.postValue(gs)
+                val gs = client.withHalted { c ->
+                    val zone = readU16(c, c.followChain(mainBase, BdspAddresses.zoneIdChain))
+                    val scene = c.readMemory(c.followChain(mainBase, BdspAddresses.sceneIdChain), 1)[0].toInt() and 0xff
+                    val battle = scene == BdspAddresses.SCENE_BATTLE
+                    GameState(
+                        zoneId = zone.takeIf { it > 0 },
+                        activeSpeciesIds = if (battle) BdspAddresses.readActiveSpecies(c, mainBase) else emptyList(),
+                        phase = if (battle) GamePhase.BATTLE else GamePhase.OVERWORLD,
+                    )
                 }
+                if (gs != _state.value) _state.postValue(gs)
+                val line = "zone ${gs.zoneId} · scene ${gs.phase}${if (gs.activeSpeciesIds.isNotEmpty()) " · vs ${gs.activeSpeciesIds}" else ""}"
+                if (line != lastLog) { detail.postValue(line); lastLog = line }
             } catch (e: Exception) {
                 Log.w(TAG, "poll error", e)
+                detail.postValue("poll error: ${e.message}")
             }
-            Thread.sleep(pollMs)
+            try { Thread.sleep(pollMs) } catch (e: InterruptedException) { break }
         }
     }
 
-    companion object { private const val TAG = "EdenBridge" }
-}
+    private fun readU16(c: GdbRspClient, addr: Long): Int {
+        val b = c.readMemory(addr, 2)
+        return (b[0].toInt() and 0xff) or ((b[1].toInt() and 0xff) shl 8)
+    }
 
-/** Per-game RAM layout, all offsets from the main module (SwitchPlayer.nss) base. */
-interface GameAddresses {
-    val zoneId: Long
-    val battleFlag: Long
-    fun readActiveSpecies(c: GdbRspClient, mainBase: Long): List<Int>
+    companion object { private const val TAG = "EdenBridge" }
 }
