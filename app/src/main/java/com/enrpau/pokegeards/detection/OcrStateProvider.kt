@@ -29,8 +29,6 @@ class OcrStateProvider(private val appContext: Context) : GameStateProvider {
     private val io = Executors.newSingleThreadExecutor()
 
     private var locations: List<Pair<Int, String>> = emptyList()
-    private var pendingId: Int? = null
-    private var pendingCount = 0
     private var confirmedId: Int? = null
 
     private val receiver = object : BroadcastReceiver() {
@@ -62,7 +60,7 @@ class OcrStateProvider(private val appContext: Context) : GameStateProvider {
     fun reloadLocations() {
         io.execute {
             locations = db.getLocations().map { it.id to it.name }
-            pendingId = null; pendingCount = 0; confirmedId = null
+            confirmedId = null
         }
     }
 
@@ -70,9 +68,11 @@ class OcrStateProvider(private val appContext: Context) : GameStateProvider {
         val match = FuzzyMatch.bestPhrase(text, locations, maxWords = 4) ?: return
         lastText.postValue("${match.second}  ←  \"${text.replace('\n', ' ').take(40)}\"")
 
-        // debounce: two consecutive reads of the same area before we commit
-        if (match.first == pendingId) pendingCount++ else { pendingId = match.first; pendingCount = 1 }
-        if (pendingCount >= 2 && match.first != confirmedId) {
+        // The banner is a clean, high-contrast OCR target, and a wrong route name
+        // needs a Levenshtein <= 2 hit against a real route name (rare from noise),
+        // so one confirmed read is enough. The short on-screen window makes the
+        // old 2-read debounce miss ~1/3 of transitions.
+        if (match.first != confirmedId) {
             confirmedId = match.first
             Log.d(TAG, "area -> ${match.second} (#${match.first})")
             _state.postValue(GameState(locationId = match.first, phase = GamePhase.OVERWORLD))

@@ -42,11 +42,15 @@ object GameStateRepository {
     private fun recompute() {
         val b = bridge.state.value
         val o = ocr?.state?.value
-        _state.value = when {
+        val next = when {
             bridge.status.value == EmulatorBridgeStateProvider.Status.RUNNING && b?.zoneId != null -> b
             o?.locationId != null -> o
             else -> manual.state.value ?: GameState(phase = GamePhase.OVERWORLD)
         }
+        // Only emit on a real change. Otherwise a manual pick (which triggers a
+        // recompute via manual.state) gets clobbered by the unchanged OCR value
+        // re-asserting itself.
+        if (next != _state.value) _state.value = next
     }
 
     /** Pack changed — refresh the OCR match lists. */
