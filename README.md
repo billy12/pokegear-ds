@@ -1,72 +1,70 @@
 # PokéGear DS
 
-**PokéGear DS** is a companion app for dual-screen Android gaming handhelds — built
-for the **AYN Thor**. It runs on the lower touchscreen while a Pokémon game plays
-on the main screen, and answers three questions in real time without breaking
-immersion:
+PokéGear DS is a companion app for dual-screen Android handhelds, built for the
+AYN Thor. It runs on the lower touchscreen while a Pokémon game plays on the main
+screen, and covers what the HeartGold/SoulSilver PokéGear did from the bottom
+screen: where you are and what lives there, what you're fighting, and what you
+still haven't caught in the current area.
 
-1. **Where am I, and what lives here?** — a habitat / route encounter tracker.
-2. **Who am I fighting right now?** — live battle type-effectiveness analysis.
-3. **What am I still missing from this area?** — caught / uncaught checklists with
-   the exact encounter conditions (method, time of day, rate, level range).
+Specifically:
 
-Modelled on the HeartGold/SoulSilver bottom-screen PokéGear / Pokédex Habitat mode.
-First-class support for **Brilliant Diamond / Shining Pearl** and **Luminescent
-Platinum**.
+- A habitat/route tracker: every species that can appear in your current area,
+  with the method, time of day, rate, and level range for each.
+- Live battle analysis: the opposing Pokémon's type weaknesses and resistances.
+- Caught/uncaught checklists per area.
+
+Brilliant Diamond / Shining Pearl and Luminescent Platinum both ship with their
+own data.
 
 > Forked from [enrique-paulino/DualScreenDex](https://github.com/enrique-paulino/DualScreenDex)
-> (MIT), which contributes the OCR battle scanner and the ROM-profile / CSV system.
-> PokéGear DS adds the habitat tracker, an encounter/location data model, and
-> per-game data packs.
+> (MIT). DualScreenDex provides the OCR battle scanner and the ROM-profile / CSV
+> system; PokéGear DS adds the habitat tracker, the encounter/location data
+> model, and the per-game data packs.
 
----
+## Habitat & route tracker
 
-## Feature pillars
+This is the main feature. For the selected area it shows:
 
-### Habitat & Route tracker (core)
+- An encounter grid of every species that can appear there, read from a local
+  SQLite database. Caught species show in full colour with their level range;
+  uncaught ones show as dimmed silhouettes. Tapping a species toggles its caught
+  state, which persists.
+- Filters by encounter method (grass, surf, the three rods, Rock Smash,
+  PokéRadar, Swarm, Grand Underground, and so on) and by time of day, plus an
+  "uncaught only" toggle.
+- An encounter card on long-press with the rate, level range, spawn conditions,
+  base stats, and types.
+- A per-area count ("17 / 24 caught here").
 
-* **Encounter grid** for the current area — every species that can appear, from a
-  local SQLite database.
-* **Catch-status matrix** — caught species in full colour with a level range;
-  uncaught ones as dimmed silhouettes. Tap to toggle; it persists.
-* **Filters** by encounter method (Grass, Surf, the fishing rods, Rock Smash,
-  PokéRadar, Swarm, Grand Underground…) and time of day, plus an "uncaught only"
-  toggle.
-* **Encounter card** (long-press) — rate, level range, spawn conditions, base
-  stats, types.
-* **Per-area progress** ("17 / 24 caught here").
-* **Swappable data packs** — BDSP and Luminescent Platinum ship built in; each
-  keeps its own catch progress.
+Data packs are swappable in-app. BDSP and Luminescent Platinum are built in, and
+each keeps its own catch progress.
 
-### Live battle context (from DualScreenDex)
+## Live battle context
 
-* OCR battle scanner (AccessibilityService + Google ML Kit) identifies the
-  opposing Pokémon and shows defensive weaknesses / resistances.
-* Supports multi-Pokémon battles, generation-specific type logic, and custom
-  matchup charts.
+Carried over from DualScreenDex. The OCR scanner (AccessibilityService + Google
+ML Kit) reads the opposing Pokémon's name off the screen and shows its defensive
+weaknesses and resistances. It handles multi-Pokémon battles, generation-specific
+type logic, and custom matchup charts.
 
-### Lower-screen UX
+## Lower-screen UX
 
-* Touch-optimised, non-blocking layout for a secondary landscape strip.
-* OLED / battery-friendly: the scanner sleeps when backgrounded and polls on a
-  timer.
-
----
+The layout is built for a secondary landscape strip: touch targets sized for it,
+nothing that blocks the view. The scanner sleeps when the app is backgrounded and
+polls on a timer to keep heat and battery down.
 
 ## How location detection works
 
-The data engine is **detection-agnostic** — the UI takes a `location_id` and
-`active_species_id` from a shared state provider, and any of these can feed it:
+The data engine doesn't care where `location_id` and `active_species_id` come
+from. A shared state provider supplies them, and any of these can be that
+provider:
 
 | Tier | Method | Status |
 | --- | --- | --- |
-| Manual | A sticky location picker on the lower screen | **working** |
-| OCR | Read the in-game area banner on zone entry, fuzzy-match against the pack's location list | planned |
-| Emulator bridge | Speak the GDB Remote Serial Protocol to Eden's debug stub (`localhost:6543`) and read game RAM directly | investigating — feasible (Eden inherits Yuzu's GDB stub) |
+| Manual | A sticky location picker on the lower screen | Working |
+| OCR | Read the in-game area banner on zone entry and fuzzy-match it against the pack's location list | Planned |
+| Emulator bridge | Speak the GDB Remote Serial Protocol to Eden's debug stub (`localhost:6543`) and read game RAM directly | Investigating; looks feasible, since Eden inherits Yuzu's GDB stub |
 
-See [`docs/NEXT.md`](docs/NEXT.md) for the roadmap.
-
----
+Roadmap: [`docs/NEXT.md`](docs/NEXT.md).
 
 ## Data packs
 
@@ -81,27 +79,23 @@ pack.json      { id, name, mechanics, dex_count, version, source_note }
 
 Built in:
 
-* **`bdsp`** — 493 species, 73 Sinnoh locations, 1161 encounters (PokéAPI
-  Diamond/Pearl tables; Grand Underground is approximate).
-* **`lumi_plat`** — 513 species, 158 locations, 4034 encounters, from the LP 3.0
-  gamedata behind [luminescent.team/mapper](https://luminescent.team/mapper).
+- `bdsp`: 493 species, 73 Sinnoh locations, 1161 encounters, from PokéAPI's
+  Diamond/Pearl tables. Grand Underground data is approximate.
+- `lumi_plat`: 513 species, 158 locations, 4034 encounters, from the LP 3.0
+  gamedata that backs [luminescent.team/mapper](https://luminescent.team/mapper).
 
-Schema and pack format live in the design docs (see below).
-
----
+The schema and pack format are in the design docs (see below).
 
 ## Tech stack
 
-* **Language:** Kotlin
-* **UI:** XML layouts / Material 3, MVVM (`ViewModel` + `LiveData`)
-* **OCR:** Google ML Kit (on-device)
-* **Data:** SQLite (`android.database.sqlite`), CSV-seeded on first launch
-* **Detection:** `AccessibilityService` + a shared `GameStateProvider`
+- Kotlin
+- XML layouts / Material 3, MVVM (`ViewModel` + `LiveData`)
+- Google ML Kit for on-device OCR
+- SQLite (`android.database.sqlite`), seeded from the CSV packs on first launch
+- `AccessibilityService` plus a shared `GameStateProvider` for detection
 
-Design docs (PRD, technical design, schema, data-pack format) are kept in a
-separate planning repo, summarised in [`docs/NEXT.md`](docs/NEXT.md).
-
----
+The design docs (PRD, technical design, schema, data-pack format) live in a
+separate planning repo. [`docs/NEXT.md`](docs/NEXT.md) summarises them.
 
 ## Building
 
@@ -112,14 +106,12 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 Needs JDK 17+ and the Android SDK (compileSdk 36, minSdk 30).
 
----
-
 ## License
 
-MIT — see [LICENSE](LICENSE). Inherited from DualScreenDex.
+MIT, see [LICENSE](LICENSE). Inherited from DualScreenDex.
 
-Bundled sprite icons are from the PokéAPI sprites collection (fan-sourced game
-rips, used here as a placeholder under fair use).
+The bundled sprite icons come from the PokéAPI sprites collection (fan-sourced
+game rips, used here as a placeholder under fair use).
 
 ---
 
