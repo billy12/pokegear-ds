@@ -1,0 +1,8 @@
+{
+  "id": "bdsp",
+  "name": "BDSP",
+  "mechanics": "GEN_6_PLUS",
+  "dex_count": 493,
+  "version": "2026.09.02",
+  "source_note": "Species/types/base-stats from PokeAPI (national dex 1-493, default forms). Encounters + locations compiled from PokeAPI Diamond+Pearl location-area tables merged per (area, species, method, time) — PokeAPI carries no brilliant-diamond/shining-pearl-labelled encounter data, and BDSP restored the original DP overworld tables. 73 Sinnoh locations, 1161 encounters. Grand Underground is 15 approximate hideaway rows (condition_note=Approximate). Not included: Ramanas Park, the Regi ruins puzzles."
+}

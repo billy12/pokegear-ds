@@ -1,0 +1,159 @@
+id,name,region,map_group,sort_order
+24,Canalave City,Sinnoh,Overworld,5000
+54,Eterna City,Sinnoh,Overworld,5001
+110,Pastoria City,Sinnoh,Overworld,5002
+142,Sunyshore City,Sinnoh,Overworld,5003
+167,Pokemon League,Sinnoh,Overworld,5004
+195,Oreburgh Mine B1F,Sinnoh,Cave,5005
+196,Oreburgh Mine B2F,Sinnoh,Cave,5006
+197,Valley Windworks (Outside),Sinnoh,Overworld,5007
+200,Eterna Forest,Sinnoh,Forest,5008
+201,Fuego Ironworks (Outside),Sinnoh,Overworld,5009
+203,Mt. Coronet - Route 207 Entrance,Sinnoh,Cave,2070
+204,Mt. Coronet - 2F,Sinnoh,Cave,5011
+205,Mt. Coronet - 3F,Sinnoh,Cave,5012
+206,Mt. Coronet - Snow Area,Sinnoh,Cave,5013
+207,Mt. Coronet - Summit,Sinnoh,Cave,5014
+208,Mt. Coronet - 4F (Waterfall),Sinnoh,Cave,5015
+209,Mt. Coronet - 4F (Towards Spear Pillar),Sinnoh,Cave,5016
+210,Mt. Coronet - 5F,Sinnoh,Cave,5017
+211,Mt. Coronet - 6F,Sinnoh,Cave,5018
+212,Mt. Coronet - Tunnel to Route 211 Entrance,Sinnoh,Cave,2110
+213,Mt. Coronet - Route 216 Entrance,Sinnoh,Cave,2160
+214,Mt. Coronet - Route 211 Entrance,Sinnoh,Cave,2110
+215,Mt. Coronet - B1F,Sinnoh,Cave,5022
+219,Great Marsh - Area 1,Sinnoh,Marsh,5023
+220,Great Marsh - Area 2,Sinnoh,Marsh,5024
+221,Great Marsh - Area 3,Sinnoh,Marsh,5025
+222,Great Marsh - Area 4,Sinnoh,Marsh,5026
+223,Great Marsh - Area 5,Sinnoh,Marsh,5027
+224,Great Marsh - Area 6,Sinnoh,Marsh,5028
+225,Solaceon Ruins - 2F,Sinnoh,Cave,5029
+227,Solaceon Ruins - F Room Dead End (NE),Sinnoh,Cave,5030
+228,Solaceon Ruins - 1F Dead End (NW),Sinnoh,Cave,5031
+229,Solaceon Ruins - F Room,Sinnoh,Cave,5032
+230,Solaceon Ruins - 1F Dead End (SE),Sinnoh,Cave,5033
+231,Solaceon Ruins - R Room,Sinnoh,Cave,5034
+232,Solaceon Ruins - F Room Dead End (SE),Sinnoh,Cave,5035
+233,Solaceon Ruins - N Room Dead End (SE),Sinnoh,Cave,5036
+234,Solaceon Ruins - E Room Dead End (SW),Sinnoh,Cave,5037
+235,Solaceon Ruins - R Room Dead End (NW),Sinnoh,Cave,5038
+236,Solaceon Ruins - R Room Dead End (SW),Sinnoh,Cave,5039
+237,Solaceon Ruins - I Room,Sinnoh,Cave,5040
+238,Solaceon Ruins - N Room,Sinnoh,Cave,5041
+239,Solaceon Ruins - E Room,Sinnoh,Cave,5042
+240,Solaceon Ruins - D Room,Sinnoh,Cave,5043
+241,Solaceon Ruins - I Room Dead End (SE),Sinnoh,Cave,5044
+242,Solaceon Ruins - N Room Dead End (NW),Sinnoh,Cave,5045
+243,Solaceon Ruins - E Room Dead End (SE),Sinnoh,Cave,5046
+244,Victory Road - 1F,Sinnoh,Cave,5047
+245,Victory Road - 2F,Sinnoh,Cave,5048
+246,Victory Road - B1F,Sinnoh,Cave,5049
+247,Victory Road - 1F Back (Marley),Sinnoh,Cave,5050
+248,Victory Road - 1F Back (Entrance),Sinnoh,Cave,5051
+249,Victory Road - 1F Back (214 Exit),Sinnoh,Cave,5052
+252,Ravaged Path,Sinnoh,Cave,5053
+255,Oreburgh Gate - 1F,Sinnoh,Cave,5054
+256,Oreburgh Gate - B1F,Sinnoh,Cave,5055
+259,Stark Mountain (Overworld),Sinnoh,Cave,5056
+260,Stark Mountain - Entrance,Sinnoh,Cave,5057
+261,Stark Mountain - Interior,Sinnoh,Cave,5058
+263,Sendoff Spring,Sinnoh,Overworld,5059
+264,Turnback Cave - Entrance,Sinnoh,Cave,5060
+265,Turnback Cave - d17r0103,Sinnoh,Cave,5061
+266,Turnback Cave - d17r0104,Sinnoh,Cave,5062
+267,Turnback Cave - d17r0105,Sinnoh,Cave,5063
+268,Turnback Cave - d17r0106,Sinnoh,Cave,5064
+269,Turnback Cave - d17r0107,Sinnoh,Cave,5065
+270,Turnback Cave - d17r0108,Sinnoh,Cave,5066
+271,Turnback Cave - d17r0109,Sinnoh,Cave,5067
+272,Turnback Cave - d17r0110,Sinnoh,Cave,5068
+273,Turnback Cave - d17r0111,Sinnoh,Cave,5069
+274,Turnback Cave - d17r0112,Sinnoh,Cave,5070
+275,Turnback Cave - d17r0113,Sinnoh,Cave,5071
+276,Turnback Cave - d17r0114,Sinnoh,Cave,5072
+277,Turnback Cave - d17r0115,Sinnoh,Cave,5073
+278,Turnback Cave - d17r0116,Sinnoh,Cave,5074
+279,Turnback Cave - d17r0117,Sinnoh,Cave,5075
+280,Turnback Cave - d17r0118,Sinnoh,Cave,5076
+281,Turnback Cave - d17r0119,Sinnoh,Cave,5077
+282,Turnback Cave - d17r0120,Sinnoh,Cave,5078
+283,Turnback Cave - d17r0121,Sinnoh,Cave,5079
+284,Turnback Cave - d17r0122,Sinnoh,Cave,5080
+286,Snowpoint Temple - 1F,Sinnoh,Cave,5081
+287,Snowpoint Temple - B1F,Sinnoh,Cave,5082
+288,Snowpoint Temple - B2F,Sinnoh,Cave,5083
+289,Snowpoint Temple - B3F,Sinnoh,Cave,5084
+290,Snowpoint Temple - B4F,Sinnoh,Cave,5085
+291,Snowpoint Temple - B5F,Sinnoh,Cave,5086
+292,Wayward Cave - Main Area,Sinnoh,Cave,5087
+293,Wayward Cave - Secret Area,Sinnoh,Cave,5088
+294,Ruin Maniac Cave - Small,Sinnoh,Cave,5089
+295,Ruin Maniac Cave - Large,Sinnoh,Cave,5090
+296,Maniac Tunnel,Sinnoh,Cave,5091
+298,Iron Island (Overworld),Sinnoh,Overworld,5092
+299,Iron Island - 1F,Sinnoh,Cave,5093
+300,Iron Island - B1F Left,Sinnoh,Cave,5094
+301,Iron Island - B1F Right,Sinnoh,Cave,5095
+302,Iron Island - B2F Right,Sinnoh,Cave,5096
+303,Iron Island - B2F Left (Riley's Room),Sinnoh,Cave,5097
+304,Iron Island - B3F,Sinnoh,Cave,5098
+306,Old Chateau - Lobby,Sinnoh,Building,5099
+307,Old Chateau - Dining Room,Sinnoh,Building,5100
+308,Old Chateau - 2F Small Rooms,Sinnoh,Building,5101
+309,Old Chateau - 2F Hallway,Sinnoh,Building,5102
+310,Old Chateau - Hallway Room 1,Sinnoh,Building,5103
+311,Old Chateau - Hallway Room 2,Sinnoh,Building,5104
+312,Old Chateau - Hallway Room 3,Sinnoh,Building,5105
+313,Old Chateau - Hallway Room 4,Sinnoh,Building,5106
+314,Old Chateau - Hallway Room 5,Sinnoh,Building,5107
+323,Lake Verity (Before),Sinnoh,Overworld,5108
+324,Lake Verity (After),Sinnoh,Overworld,5109
+327,Lake Valor (After),Sinnoh,Overworld,5110
+330,Lake Acuity (After),Sinnoh,Overworld,5111
+347,Valor Lakefront,Sinnoh,Overworld,5112
+351,Acuity Lakefront,Sinnoh,Overworld,5113
+354,Route 201,Sinnoh,Overworld,2010
+355,Route 202,Sinnoh,Overworld,2020
+356,Route 203,Sinnoh,Overworld,2030
+357,Route 204 (South),Sinnoh,Overworld,2042
+358,Route 204 (North),Sinnoh,Overworld,2041
+359,Route 205 (South),Sinnoh,Overworld,2052
+361,Route 205 (North),Sinnoh,Overworld,2051
+362,Route 206,Sinnoh,Overworld,2060
+364,Route 207,Sinnoh,Overworld,2070
+365,Route 208,Sinnoh,Overworld,2080
+367,Route 209,Sinnoh,Overworld,2090
+368,Lost Tower - 1F,Sinnoh,Cave,5125
+369,Lost Tower - 2F,Sinnoh,Cave,5126
+370,Lost Tower - 3F,Sinnoh,Cave,5127
+371,Lost Tower - 4F,Sinnoh,Cave,5128
+372,Lost Tower - 5F,Sinnoh,Cave,5129
+373,Route 210 (South),Sinnoh,Overworld,2102
+375,Route 210 (North),Sinnoh,Overworld,2101
+377,Route 211 (West),Sinnoh,Overworld,2112
+378,Route 211 (East),Sinnoh,Overworld,2111
+379,Route 212 (North),Sinnoh,Overworld,2121
+380,Trophy Garden,Sinnoh,Overworld,5135
+383,Route 212 (South),Sinnoh,Overworld,2122
+385,Route 213,Sinnoh,Overworld,2130
+392,Route 214,Sinnoh,Overworld,2140
+394,Route 215,Sinnoh,Overworld,2150
+395,Route 216,Sinnoh,Overworld,2160
+397,Route 217,Sinnoh,Overworld,2170
+400,Route 218,Sinnoh,Overworld,2180
+403,Route 219,Sinnoh,Water,2190
+404,Route 221,Sinnoh,Overworld,2210
+407,Route 222,Sinnoh,Overworld,2220
+411,Route 224,Sinnoh,Water,2240
+412,Route 225,Sinnoh,Overworld,2250
+414,Route 227,Sinnoh,Overworld,2270
+416,Route 228,Sinnoh,Overworld,2280
+420,Route 229,Sinnoh,Overworld,2290
+422,Twinleaf Town,Sinnoh,Overworld,5151
+456,Celestic Town,Sinnoh,Overworld,5152
+473,Resort Area,Sinnoh,Overworld,5153
+485,Route 220,Sinnoh,Water,2200
+486,Route 223,Sinnoh,Water,2230
+487,Route 226,Sinnoh,Overworld,2260
+489,Route 230,Sinnoh,Water,2300
