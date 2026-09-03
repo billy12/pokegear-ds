@@ -80,6 +80,9 @@ class TitleDetector(
         }
     }
 
+    /** Also called once a real zone is detected (we're past the title screen). */
+    fun stop() = finish()
+
     private var stopped = false
     private fun finish() {
         if (stopped) return

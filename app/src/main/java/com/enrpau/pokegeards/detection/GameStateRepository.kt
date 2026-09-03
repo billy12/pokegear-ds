@@ -46,7 +46,13 @@ object GameStateRepository {
         _state.addSource(manual.state) { recompute() }
         _state.addSource(bridge.state) { recompute() }
         _state.addSource(bridge.status) { recompute() }
-        ocr?.state?.let { s -> _state.addSource(s) { recompute() } }
+        ocr?.state?.let { s ->
+            _state.addSource(s) { gs ->
+                // a confirmed zone means we're in-game past the title screen
+                if (gs?.locationId != null) titleDetector?.stop()
+                recompute()
+            }
+        }
     }
 
     private fun recompute() {
