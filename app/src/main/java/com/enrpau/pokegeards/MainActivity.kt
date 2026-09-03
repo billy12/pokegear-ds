@@ -93,6 +93,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnOpenHabitat).setOnClickListener {
             startActivity(Intent(this, com.enrpau.pokegeards.habitat.HabitatActivity::class.java))
         }
+        findViewById<View>(R.id.btnEdenBridge).setOnClickListener {
+            startActivity(Intent(this, com.enrpau.pokegeards.bridge.BridgeDebugActivity::class.java))
+        }
 
         viewModel.displayedPokemon.observeForeverSafe { pokemon ->
             updateCardUI(pokemon)
