@@ -65,7 +65,11 @@ class OcrStateProvider(private val appContext: Context) : GameStateProvider {
     }
 
     private fun handle(text: String) {
-        val match = FuzzyMatch.bestPhrase(text, locations, maxWords = 4) ?: return
+        val match = FuzzyMatch.bestPhrase(text, locations, maxWords = 4)
+        if (match == null) {
+            Log.d(TAG, "no area match in \"${text.replace('\n', ' ').take(60)}\" (${locations.size} locs)")
+            return
+        }
         lastText.postValue("${match.second}  ←  \"${text.replace('\n', ' ').take(40)}\"")
 
         // The banner is a clean, high-contrast OCR target, and a wrong route name

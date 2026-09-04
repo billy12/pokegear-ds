@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dexScanRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#EFEBE9"
+    android:fitsSystemWindows="true"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvDexHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dex_scan_header"
+        android:textColor="#3E2723"
+        android:textStyle="bold"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/tvDexStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dex_scan_running"
+        android:textColor="#6D4C41"
+        android:textSize="13sp"
+        android:layout_marginTop="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:id="@+id/tvDexCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="#3E2723"
+            android:textStyle="bold"
+            android:textSize="48sp" />
+
+        <TextView
+            android:id="@+id/tvDexCaughtLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dex_scan_matched"
+            android:textColor="#6D4C41"
+            android:textSize="13sp"
+            android:layout_marginStart="10dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvDexRecent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:textColor="#8D6E63"
+        android:textSize="13sp"
+        android:lineSpacingExtra="2dp"
+        android:gravity="top" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDexAccessibility"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dex_scan_open_settings"
+        android:visibility="gone"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_marginBottom="8dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDexDone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dex_scan_done" />
+</LinearLayout>

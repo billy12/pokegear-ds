@@ -44,7 +44,19 @@
     <string name="habitat_close">Close</string>
     <string name="habitat_uncaught_only">Uncaught</string>
     <string name="habitat_pack_title">Data pack</string>
-    <string name="open_bridge">🔌 bridge</string>
-    <string name="habitat_open_main">Pokédex ›</string>
+    <string name="habitat_open_main">Battledex ›</string>
     <string name="habitat_location_dialog">Area</string>
+    <string name="habitat_rebuild_dex">⟳ Rebuild Dex</string>
+    <string name="habitat_rebuild_dex_confirm">Clear %1$s catch progress and rebuild it from a scan of your in-game Pokédex? Other packs are untouched.</string>
+
+    <!-- Pokédex rebuild scan -->
+    <string name="dex_scan_title">Rebuild Pokédex</string>
+    <string name="dex_scan_header">Rebuild Pokédex from scan</string>
+    <string name="dex_scan_running">Open your in-game Pokédex and scroll slowly, top to bottom.</string>
+    <string name="dex_scan_clearing">Clearing old catch data…</string>
+    <string name="dex_scan_matched">caught (scanned)</string>
+    <string name="dex_scan_need_service">Turn on the PokéGear DS accessibility service to scan.</string>
+    <string name="dex_scan_open_settings">Open accessibility settings</string>
+    <string name="dex_scan_done">Done</string>
+    <string name="dex_scan_cancel">Cancel</string>
 </resources>

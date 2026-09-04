@@ -104,9 +104,6 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnOpenHabitat).setOnClickListener {
             startActivity(Intent(this, com.enrpau.pokegeards.habitat.HabitatActivity::class.java))
         }
-        findViewById<View>(R.id.btnEdenBridge).setOnClickListener {
-            startActivity(Intent(this, com.enrpau.pokegeards.bridge.BridgeDebugActivity::class.java))
-        }
 
         viewModel.displayedPokemon.observeForeverSafe { pokemon ->
             updateCardUI(pokemon)
@@ -114,6 +111,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.pokedexList.observeForeverSafe { list ->
             adapter.updateList(list)
+            refreshCaughtMarkers()
         }
 
         viewModel.isBattleMode.observeForeverSafe { isBattle ->
@@ -316,6 +314,18 @@ class MainActivity : AppCompatActivity() {
             adapter.updateSettings(currentMechanics, currentTheme)
             val freshList = viewModel.repository.getAllPokemon()
             adapter.updateList(freshList)
+            refreshCaughtMarkers()
+        }
+    }
+
+    /** Pull caught status (active pack) into the Battledex list — same data the Habitat tracker writes. */
+    private fun refreshCaughtMarkers() {
+        if (!::adapter.isInitialized) return
+        caughtCheckExecutor.execute {
+            val ids = try {
+                com.enrpau.pokegeards.data.db.PokegearDb.get(this).caughtIds()
+            } catch (e: Exception) { emptySet() }
+            runOnUiThread { adapter.setCaughtIds(ids) }
         }
     }
 

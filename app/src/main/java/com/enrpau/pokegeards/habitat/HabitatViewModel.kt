@@ -56,8 +56,13 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
             gs ?: return@addSource
             io.execute {
                 val locId = gs.locationId ?: gs.zoneId?.let { db.locationForZone(it) } ?: return@execute
+                val known = locations.value.orEmpty().any { it.id == locId }
+                android.util.Log.d(
+                    "HabitatFollow",
+                    "state loc=$locId selected=${selectedLocationId.value} known=$known (${locations.value.orEmpty().size} locs)"
+                )
                 main.post {
-                    if (locId != selectedLocationId.value && locations.value.orEmpty().any { it.id == locId }) {
+                    if (locId != selectedLocationId.value && known) {
                         selectLocation(locId)
                     }
                 }
@@ -147,7 +152,8 @@ class HabitatViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun reload() {
+    /** Re-query the current area (e.g. after the Pokédex rebuild scan changed catch state). */
+    fun reload() {
         val loc = selectedLocationId.value ?: run {
             main.post { encounters.value = emptyList(); progress.value = AreaProgress(0, 0) }
             return

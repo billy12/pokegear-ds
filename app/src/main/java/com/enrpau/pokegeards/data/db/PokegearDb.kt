@@ -305,6 +305,16 @@ class PokegearDb private constructor(private val context: Context) :
         return out
     }
 
+    /** All caught species ids in the active pack — for the Battledex list markers. */
+    fun caughtIds(): Set<Int> {
+        val pack = activePackId()
+        val out = HashSet<Int>()
+        readableDatabase.rawQuery(
+            "SELECT species_id FROM player_state WHERE pack_id=? AND is_caught=1", arrayOf(pack)
+        ).use { c -> while (c.moveToNext()) out.add(c.getInt(0)) }
+        return out
+    }
+
     fun isCaught(speciesId: Int): Boolean {
         val pack = activePackId()
         readableDatabase.rawQuery(
@@ -412,6 +422,27 @@ class PokegearDb private constructor(private val context: Context) :
                ON CONFLICT(pack_id, species_id)
                DO UPDATE SET is_caught = excluded.is_caught, updated_at = excluded.updated_at""",
             arrayOf<Any>(pack, speciesId, if (caught) 1 else 0, System.currentTimeMillis())
+        )
+    }
+
+    /** Total caught species in the active pack (for the Pokédex rebuild counter). */
+    fun caughtCount(): Int {
+        val pack = activePackId()
+        readableDatabase.rawQuery(
+            "SELECT COUNT(*) FROM player_state WHERE pack_id=? AND is_caught=1", arrayOf(pack)
+        ).use { c -> return if (c.moveToFirst()) c.getInt(0) else 0 }
+    }
+
+    /**
+     * Wipe caught flags for the active pack only — the "clear" half of the
+     * Pokédex rebuild. Other packs' progress is untouched (keyed by pack_id).
+     * Call off the main thread.
+     */
+    fun clearCaughtForActivePack() {
+        val pack = activePackId()
+        writableDatabase.execSQL(
+            "UPDATE player_state SET is_caught=0, updated_at=? WHERE pack_id=?",
+            arrayOf<Any>(System.currentTimeMillis(), pack)
         )
     }
 

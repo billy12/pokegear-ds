@@ -70,6 +70,14 @@
             android:layout_weight="1" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRebuildDex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/habitat_rebuild_dex"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:textColor="#8D6E63" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnMain"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

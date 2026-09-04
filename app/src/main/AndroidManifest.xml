@@ -45,6 +45,11 @@
             android:exported="false"
             android:label="Eden bridge" />
 
+        <activity
+            android:name=".dex.PokedexScanActivity"
+            android:exported="false"
+            android:label="@string/dex_scan_title" />
+
         <service
             android:name=".DualDexAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"

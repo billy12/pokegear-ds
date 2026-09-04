@@ -69,6 +69,7 @@ class HabitatActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.btnMain).setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java).putExtra("stay", true))
         }
+        findViewById<MaterialButton>(R.id.btnRebuildDex).setOnClickListener { confirmRebuildDex() }
 
         val span = (resources.configuration.screenWidthDp / 110).coerceIn(2, 6)
         rv.layoutManager = GridLayoutManager(this, span)
@@ -83,6 +84,20 @@ class HabitatActivity : AppCompatActivity() {
         // Settings screen may have changed the theme while we were backgrounded.
         ThemeManager.loadTheme(this)
         if (ThemeManager.currentTheme.id != theme?.id) applyTheme()
+        // Returning from the Pokédex rebuild scan: catch counts may have changed.
+        vm.reload()
+    }
+
+    private fun confirmRebuildDex() {
+        val packLabel = vm.packName.value ?: getString(R.string.habitat_pack_title)
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.habitat_rebuild_dex)
+            .setMessage(getString(R.string.habitat_rebuild_dex_confirm, packLabel))
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                startActivity(Intent(this, com.enrpau.pokegeards.dex.PokedexScanActivity::class.java))
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     /** Carry the DualScreenDex settings theme (OLED, etc.) into the Habitat screen. */
@@ -100,6 +115,7 @@ class HabitatActivity : AppCompatActivity() {
         btnLocation.strokeColor = ColorStateList.valueOf(t.subTextColor)
         btnLocation.iconTint = ColorStateList.valueOf(t.headerTextColor)
         findViewById<MaterialButton>(R.id.btnMain).setTextColor(t.headerTextColor)
+        findViewById<MaterialButton>(R.id.btnRebuildDex).setTextColor(t.headerTextColor)
 
         themeChip(chipPack)
         themeChip(chipUncaught)

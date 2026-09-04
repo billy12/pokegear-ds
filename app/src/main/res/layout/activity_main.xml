@@ -33,33 +33,16 @@
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenHabitat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="8dp"
-            android:baselineAligned="false">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnOpenHabitat"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/open_habitat"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                app:strokeColor="#5D4037"
-                app:strokeWidth="2dp"
-                android:textColor="#5D4037" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEdenBridge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="@string/open_bridge"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:textColor="#8D6E63" />
-        </LinearLayout>
+            android:text="@string/open_habitat"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="#5D4037"
+            app:strokeWidth="2dp"
+            android:textColor="#5D4037" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvPokemonList"

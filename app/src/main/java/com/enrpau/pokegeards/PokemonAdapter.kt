@@ -18,6 +18,13 @@ class PokemonAdapter(
     private var filteredList = fullList.toMutableList()
     private var currentMechanics: RomProfile.Mechanics = RomProfile.Mechanics.GEN_6_PLUS
     private var currentTheme: AppTheme = ThemeManager.currentTheme
+    private var caughtIds: Set<Int> = emptySet()
+
+    /** Caught species (active pack), shared with the Habitat tracker. Read-only here. */
+    fun setCaughtIds(ids: Set<Int>) {
+        caughtIds = ids
+        notifyDataSetChanged()
+    }
 
     inner class PokemonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvRowName)
@@ -41,7 +48,8 @@ class PokemonAdapter(
             cleanName
         }
 
-        holder.tvName.text = displayName
+        val caughtMark = if (pokemon.id in caughtIds) "✔ " else ""
+        holder.tvName.text = caughtMark + displayName
         holder.tvId.text = String.format("#%03d", pokemon.id)
 
         holder.tvName.setTextColor(currentTheme.listTextColor)
