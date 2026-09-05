@@ -7,14 +7,26 @@ package com.enrpau.pokegeards.detection
  */
 object FuzzyMatch {
 
+    /** A match plus the edit distance that earned it (0 for an exact hit). */
+    data class Scored(val id: Int, val name: String, val dist: Int)
+
     /** Best entry in [candidates] (id to name) matching [input], or null. */
-    fun best(input: String, candidates: List<Pair<Int, String>>): Pair<Int, String>? {
+    fun best(input: String, candidates: List<Pair<Int, String>>): Pair<Int, String>? =
+        bestScored(input, candidates)?.let { it.id to it.name }
+
+    /**
+     * Same scan as [best], but reports the winning distance so callers can compare
+     * two candidate lists (e.g. full location names vs. split-family base names)
+     * and only prefer the second when it is strictly closer.
+     */
+    fun bestScored(input: String, candidates: List<Pair<Int, String>>): Scored? {
         val q = input.trim()
         if (q.length < 3) return null
-        candidates.firstOrNull { it.second.equals(q, true) }?.let { return it }
+        candidates.firstOrNull { it.second.equals(q, true) }
+            ?.let { return Scored(it.first, it.second, 0) }
 
         val first = q.first().lowercaseChar()
-        var bestPair: Pair<Int, String>? = null
+        var bestHit: Scored? = null
         var bestDist = Int.MAX_VALUE
         for (c in candidates) {
             val name = c.second
@@ -23,10 +35,10 @@ object FuzzyMatch {
             val threshold = if (name.length < 6) 1 else 2
             if (dist <= threshold && dist < bestDist) {
                 bestDist = dist
-                bestPair = c
+                bestHit = Scored(c.first, name, dist)
             }
         }
-        return bestPair
+        return bestHit
     }
 
     /** Try to match any whitespace-run of words in [text] (1..maxWords long) against [candidates]. */

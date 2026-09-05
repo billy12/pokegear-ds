@@ -31,6 +31,9 @@ class OcrStateProvider(private val appContext: Context) : GameStateProvider {
     private var locations: List<Pair<Int, String>> = emptyList()
     private var confirmedId: Int? = null
 
+    /** Base-name/family matching + the last-5 history used to break family ties. */
+    val resolver = LocationResolver()
+
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action != ACTION_LOCATION_TEXT) return
@@ -61,15 +64,17 @@ class OcrStateProvider(private val appContext: Context) : GameStateProvider {
         io.execute {
             locations = db.getLocations().map { it.id to it.name }
             confirmedId = null
+            resolver.reset()
         }
     }
 
     private fun handle(text: String) {
-        val match = FuzzyMatch.bestPhrase(text, locations, maxWords = 4)
-        if (match == null) {
+        val id = resolver.resolve(text, locations, maxWords = 4)
+        if (id == null) {
             Log.d(TAG, "no area match in \"${text.replace('\n', ' ').take(60)}\" (${locations.size} locs)")
             return
         }
+        val match = id to (locations.firstOrNull { it.first == id }?.second ?: "#$id")
         lastText.postValue("${match.second}  ←  \"${text.replace('\n', ' ').take(40)}\"")
 
         // The banner is a clean, high-contrast OCR target, and a wrong route name

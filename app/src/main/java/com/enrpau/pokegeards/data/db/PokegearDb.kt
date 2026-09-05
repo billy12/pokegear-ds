@@ -356,12 +356,24 @@ class PokegearDb private constructor(private val context: Context) :
     ): List<EncounterRow> {
         val pack = activePackId()
         val args = ArrayList<String>()
+        // Time buckets are alternatives, never additive: within one bucket a species'
+        // real rate is its ANY row plus that bucket's own row, and those bucket rates
+        // sum to ~100% across the area. So average the buckets in play — the picked
+        // chips, or all three real buckets when nothing is picked — instead of summing
+        // every row, which double-counted the bonuses and pushed areas past 100%.
+        val buckets = (if (times.isEmpty()) TIME_ORDER else times.toList()).filter { it != "ANY" }
+        val anyRate = "SUM(CASE WHEN e.time_of_day = 'ANY' THEN COALESCE(e.rate, 0) ELSE 0 END)"
+        val rateExpr = if (buckets.isEmpty()) anyRate else {
+            args.addAll(buckets)
+            "$anyRate + SUM(CASE WHEN e.time_of_day IN (${buckets.joinToString(",") { "?" }})" +
+                " THEN COALESCE(e.rate, 0) ELSE 0 END) * 1.0 / ${buckets.size}"
+        }
         args.add(pack); args.add(pack); args.add(locationId.toString())
         val sb = StringBuilder(
             """SELECT MIN(e.id) AS enc_id,
                       e.method,
                       CASE WHEN COUNT(DISTINCT e.time_of_day) > 1 THEN 'ANY' ELSE MIN(e.time_of_day) END AS tod,
-                      CASE WHEN COUNT(e.rate) = 0 THEN NULL ELSE SUM(e.rate) END AS agg_rate,
+                      CASE WHEN COUNT(e.rate) = 0 THEN NULL ELSE $rateExpr END AS agg_rate,
                       MIN(e.min_level), MAX(e.max_level), MAX(e.condition_note),
                       s.id, s.name, s.type1, s.type2, s.base_hp, s.base_atk, s.base_def,
                       s.base_spa, s.base_spd, s.base_spe, s.sprite_key,
@@ -402,7 +414,8 @@ class PokegearDb private constructor(private val context: Context) :
                         species = species,
                         method = c.getString(1),
                         timeOfDay = c.getString(2),
-                        rate = if (c.isNull(3)) null else c.getInt(3),
+                        // agg_rate is a REAL once buckets are averaged — round for display
+                        rate = if (c.isNull(3)) null else Math.round(c.getDouble(3)).toInt(),
                         minLevel = c.getInt(4),
                         maxLevel = c.getInt(5),
                         conditionNote = if (c.isNull(6)) null else c.getString(6),
