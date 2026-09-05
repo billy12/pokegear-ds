@@ -14,8 +14,12 @@ import com.enrpau.pokegeards.data.RomManager
 import com.enrpau.pokegeards.detection.ACTION_CATCH_TEXT
 import com.enrpau.pokegeards.detection.ACTION_DEX_TEXT
 import com.enrpau.pokegeards.detection.ACTION_LOCATION_TEXT
+import com.enrpau.pokegeards.detection.ACTION_TITLE_COLOR
 import com.enrpau.pokegeards.detection.ACTION_TITLE_TEXT
 import com.enrpau.pokegeards.detection.DexScanState
+import com.enrpau.pokegeards.detection.GameStateRepository
+import com.enrpau.pokegeards.detection.TitleScanState
+import com.enrpau.pokegeards.detection.TitleScreenColorClassifier
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -61,6 +65,11 @@ class DualDexAccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            // whichever app just took the screen — the title window re-arms when
+            // that app is Eden, since a game is probably about to boot
+            GameStateRepository.onForegroundApp(event.packageName?.toString())
+        }
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED ||
             event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             triggerScreenScan()
@@ -188,6 +197,38 @@ class DualDexAccessibilityService : AccessibilityService() {
             recognizer.process(InputImage.fromBitmap(region, 0))
                 .addOnSuccessListener { vt -> broadcastText(ACTION_TITLE_TEXT, vt.text) }
         }
+        // and the non-OCR half of the same job: the party icons Eden draws
+        // bottom-right while it compiles shaders. Runs only while
+        // TitleDetector's window is open, same as the pass above.
+        classifyTitleColors(bitmap)
+    }
+
+    /**
+     * Reads the bottom-right corner of the boot screen and broadcasts the pack
+     * it looks like. One [Bitmap.getPixels] for the whole region, then pure
+     * arithmetic — cheap enough to sit alongside the OCR passes, and gated so it
+     * stops once the pack is settled.
+     */
+    private fun classifyTitleColors(bitmap: Bitmap) {
+        if (!TitleScanState.colorScanActive) return
+        val r = TitleScreenColorClassifier.region(bitmap.width, bitmap.height)
+        if (r.width <= 0 || r.height <= 0) return
+        val profile = try {
+            val pixels = IntArray(r.width * r.height)
+            bitmap.getPixels(pixels, 0, r.width, r.x, r.y, r.width, r.height)
+            TitleScreenColorClassifier.profileRegion(pixels, r.width, r.height)
+        } catch (e: Exception) {
+            android.util.Log.w("DualDex_Service", "title colour pass failed", e)
+            return
+        }
+        // logged every pass, not just on a verdict: the window is short and this
+        // is the only way to see why a boot screen did or didn't get recognised
+        android.util.Log.d("DualDex_Service", "title colour -> $profile")
+        val packId = profile.result.packId ?: return
+        sendBroadcast(Intent(ACTION_TITLE_COLOR).apply {
+            setPackage(packageName)
+            putExtra("PACK_ID", packId)
+        })
     }
 
     private fun crop(src: Bitmap, x: Int, y: Int, cw: Int, ch: Int): Bitmap? = try {

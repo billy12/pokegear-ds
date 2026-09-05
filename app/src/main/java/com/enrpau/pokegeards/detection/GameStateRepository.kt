@@ -1,6 +1,7 @@
 package com.enrpau.pokegeards.detection
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,6 +25,9 @@ object GameStateRepository {
     /** Emits a pack id when title-screen detection auto-switches the pack. */
     val externalPackSwitch = MutableLiveData<String>()
 
+    /** Decides whether a foreground switch into Eden should re-open the title window. */
+    private val rearmPolicy = TitleRearmPolicy()
+
     private val _state = MediatorLiveData<GameState>().apply {
         value = GameState(phase = GamePhase.OVERWORLD)
     }
@@ -39,6 +43,7 @@ object GameStateRepository {
         ocr = OcrStateProvider(app).also { it.start() }
         caughtTracker = CaughtTracker(app).also { it.start() }
         titleDetector = TitleDetector(app) { packId ->
+            rearmPolicy.onPackDetected(System.currentTimeMillis())
             onPackChanged()
             externalPackSwitch.value = packId
         }.also { it.start() }
@@ -69,6 +74,17 @@ object GameStateRepository {
         if (next != _state.value) _state.value = next
     }
 
+    /**
+     * Every foreground app the accessibility service sees. Switching into Eden
+     * means a game is probably about to boot, so the title window re-opens —
+     * see [TitleRearmPolicy] for when it declines to.
+     */
+    fun onForegroundApp(pkg: String?) {
+        if (!rearmPolicy.onForeground(pkg, System.currentTimeMillis())) return
+        Log.d(TAG, "eden foreground ($pkg) -> re-arming title detection")
+        titleDetector?.rearm()
+    }
+
     /** Pack changed — refresh the OCR match lists. */
     fun onPackChanged() {
         ocr?.reloadLocations()
@@ -79,4 +95,6 @@ object GameStateRepository {
     fun stopBridge() = bridge.stop()
     val bridgeRunning: Boolean
         get() = bridge.status.value == EmulatorBridgeStateProvider.Status.RUNNING
+
+    private const val TAG = "GameState"
 }
