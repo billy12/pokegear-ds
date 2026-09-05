@@ -49,6 +49,16 @@
     <string name="habitat_rebuild_dex">⟳ Rebuild Dex</string>
     <string name="habitat_rebuild_dex_confirm">Clear %1$s catch progress and rebuild it from a scan of your in-game Pokédex? Other packs are untouched.</string>
 
+    <!-- Region map -->
+    <string name="map_title">Region map</string>
+    <!-- Icon only: this button lives inline in the Habitat top row, where width is tight. -->
+    <string name="habitat_open_map">🗺</string>
+    <string name="map_hint">Drag to pan · pinch or double-tap to zoom · tap an area to see what appears there</string>
+    <string name="map_empty">This data pack has no areas.</string>
+    <string name="map_area_empty">No encounters recorded here.</string>
+    <string name="map_area_placeholder">Route 201</string>
+    <string name="map_kind_placeholder">Route</string>
+
     <!-- Pokédex rebuild scan -->
     <string name="dex_scan_title">Rebuild Pokédex</string>
     <string name="dex_scan_header">Rebuild Pokédex from scan</string>

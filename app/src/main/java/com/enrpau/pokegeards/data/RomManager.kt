@@ -43,7 +43,7 @@ object RomManager {
         ),
         RomProfile(
             id = "lumi_plat",
-            name = "Luminescent Platinum",
+            name = "Lumi P",
             isBuiltIn = true,
             dexFilePath = "dex/luminescent_pokedex.csv",
             regionalFilePath = "dex/luminescent_regional.csv",

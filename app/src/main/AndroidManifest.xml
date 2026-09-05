@@ -41,6 +41,11 @@
             android:label="@string/habitat_title" />
 
         <activity
+            android:name=".map.MapActivity"
+            android:exported="false"
+            android:label="@string/map_title" />
+
+        <activity
             android:name=".bridge.BridgeDebugActivity"
             android:exported="false"
             android:label="Eden bridge" />

@@ -30,6 +30,23 @@
             app:strokeColor="#5D4037"
             android:textColor="#3E2723" />
 
+        <!-- Sits in the dead space the weighted location button leaves next to its dropdown arrow. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/habitat_open_map"
+            android:contentDescription="@string/map_title"
+            android:minWidth="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:textSize="18sp"
+            android:layout_marginStart="4dp"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:textColor="#8D6E63" />
+
         <TextView
             android:id="@+id/tvProgress"
             android:layout_width="wrap_content"
@@ -41,12 +58,18 @@
             android:layout_marginStart="10dp" />
     </LinearLayout>
 
-    <LinearLayout
+    <!-- Scrolls: pack name + three buttons overflow a phone width on their own. -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:scrollbars="none"
         android:layout_marginTop="4dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipPack"
@@ -64,11 +87,6 @@
             android:checkable="true"
             style="@style/Widget.Material3.Chip.Filter" />
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRebuildDex"
             android:layout_width="wrap_content"
@@ -85,6 +103,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:textColor="#8D6E63" />
     </LinearLayout>
+    </HorizontalScrollView>
 
     <HorizontalScrollView
         android:layout_width="match_parent"

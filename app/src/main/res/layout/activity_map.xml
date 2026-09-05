@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mapRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#EFEBE9"
+    android:fitsSystemWindows="true"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/tvMapPack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/map_title"
+        android:textColor="#3E2723"
+        android:textStyle="bold"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvMapEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/map_empty"
+        android:textColor="#8D6E63"
+        android:gravity="center"
+        android:padding="24dp"
+        android:visibility="gone" />
+
+    <com.enrpau.pokegeards.map.MapCanvasView
+        android:id="@+id/mapCanvas"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="6dp" />
+
+    <TextView
+        android:id="@+id/tvMapHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/map_hint"
+        android:textColor="#A1887F"
+        android:textSize="10sp"
+        android:gravity="center" />
+</LinearLayout>

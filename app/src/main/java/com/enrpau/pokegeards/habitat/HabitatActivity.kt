@@ -69,6 +69,9 @@ class HabitatActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.btnMain).setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java).putExtra("stay", true))
         }
+        findViewById<MaterialButton>(R.id.btnMap).setOnClickListener {
+            startActivity(Intent(this, com.enrpau.pokegeards.map.MapActivity::class.java))
+        }
         findViewById<MaterialButton>(R.id.btnRebuildDex).setOnClickListener { confirmRebuildDex() }
 
         val span = (resources.configuration.screenWidthDp / 110).coerceIn(2, 6)
@@ -115,6 +118,7 @@ class HabitatActivity : AppCompatActivity() {
         btnLocation.strokeColor = ColorStateList.valueOf(t.subTextColor)
         btnLocation.iconTint = ColorStateList.valueOf(t.headerTextColor)
         findViewById<MaterialButton>(R.id.btnMain).setTextColor(t.headerTextColor)
+        findViewById<MaterialButton>(R.id.btnMap).setTextColor(t.headerTextColor)
         findViewById<MaterialButton>(R.id.btnRebuildDex).setTextColor(t.headerTextColor)
 
         themeChip(chipPack)
