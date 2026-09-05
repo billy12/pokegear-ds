@@ -89,8 +89,18 @@ class PackAdjacencyTest {
         val keys = bdsp.map { it.lowercase() }
         val r = GraphLayout.layout(keys, PackAdjacency.forPack(bdsp))
         assertEquals(keys.toSet(), r.positions.keys)
-        println("bdsp layout: n=${keys.size} iterations=${r.iterations} isolated=${r.isolated}")
-        assertEquals("bdsp isolated column", 11, r.isolated.size)
+        println("bdsp layout: n=${keys.size} anchored=${r.anchored} isolated=${r.isolated}")
+        // Six of the eleven edgeless rows still get a real position, because the
+        // layout is anchor-first now and bdsp's unsplit names base-match the same
+        // GeographicAnchors entries: Hearthome City, Newmoon Island, Spear Pillar,
+        // Flower Paradise, Route 224 and "Pokémon League" (aliased, accent and all).
+        // Only rows the reference map has no entry for are still parked.
+        assertEquals("bdsp isolated column", 5, r.isolated.size)
+        assertEquals(
+            listOf("floaroma meadow", "grand underground", "hall of origin",
+                "oreburgh mining museum", "roaming sinnoh"),
+            r.isolated.sorted(),
+        )
     }
 
     @Test fun bdspStarterAreaIsWiredUp() {

@@ -1,16 +1,28 @@
 package com.enrpau.pokegeards
 
 import android.graphics.Bitmap
+import android.view.InputDevice
+import android.view.MotionEvent
 import androidx.core.view.drawToBitmap
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.GeneralClickAction
+import androidx.test.espresso.action.Press
+import androidx.test.espresso.action.Tap
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.doubleClick
 import androidx.test.espresso.action.ViewActions.swipeLeft
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
 import com.enrpau.pokegeards.map.MapActivity
 import com.enrpau.pokegeards.map.MapCanvasView
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -32,9 +44,33 @@ class MapCanvasInteractionTest {
 
     @get:Rule val rule = ActivityScenarioRule(MapActivity::class.java)
 
-    // lumi_plat/locations.csv ids, chosen to sit at opposite ends of the region.
-    private val ROUTE_201 = 354
-    private val SUNYSHORE = 142
+    /**
+     * The manual provider is a process-wide singleton, so a location one test picks
+     * is still current when the next one's map opens — and the marker's endless
+     * pulse means Espresso's MAIN_LOOPER_HAS_IDLED condition never passes, which
+     * fails that test with AppNotIdleException. Clear it after each test.
+     */
+    @After fun clearCurrentLocation() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            com.enrpau.pokegeards.detection.GameStateRepository.manual.setLocation(null)
+        }
+    }
+
+    // Two areas at opposite ends of the region, looked up in whichever pack is
+    // active — the row ids differ per pack (bdsp calls Sunyshore 34, lumi_plat 142),
+    // so hard-coding one pack's ids only ever passed on a device carrying that pack.
+    private val ROUTE_201 by lazy { locationId("Route 201") }
+    private val SUNYSHORE by lazy { locationId("Sunyshore City") }
+
+    private fun locationId(name: String): Int {
+        val ctx = InstrumentationRegistry.getInstrumentation().targetContext
+        val rows = com.enrpau.pokegeards.data.db.PokegearDb.get(ctx).getLocations()
+        return rows.first { it.name == name }.id
+    }
+
+    // Where region_map_bdsp.png draws Sunyshore City's block, in its own pixels.
+    private val SUNYSHORE_IMAGE_X = 1016f
+    private val SUNYSHORE_IMAGE_Y = 712f
 
     private val outDir: File by lazy {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
@@ -43,9 +79,28 @@ class MapCanvasInteractionTest {
         File(ctx.filesDir, "maptest").apply { mkdirs() }
     }
 
+    /**
+     * Run [block] on the main thread against the resumed activity.
+     *
+     * Deliberately not `ActivityScenario.onActivity`: that calls
+     * `Instrumentation.waitForIdleSync` first, and once the current-location marker
+     * is pulsing the main looper has a frame callback queued at all times, so it
+     * never reports idle and the call never returns. `runOnMainSync` only waits for
+     * the block itself.
+     */
+    private fun onMain(block: (MapActivity) -> Unit) {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val act = ActivityLifecycleMonitorRegistry.getInstance()
+                .getActivitiesInStage(Stage.RESUMED)
+                .filterIsInstance<MapActivity>()
+                .first()
+            block(act)
+        }
+    }
+
     private fun capture(name: String): Bitmap {
         var bmp: Bitmap? = null
-        rule.scenario.onActivity { act ->
+        onMain { act ->
             bmp = act.findViewById<MapCanvasView>(R.id.mapCanvas).drawToBitmap()
         }
         val b = requireNotNull(bmp)
@@ -67,7 +122,7 @@ class MapCanvasInteractionTest {
 
     private fun state(): Triple<Float, Float, Int> {
         var out = Triple(0f, 0f, 0)
-        rule.scenario.onActivity { act ->
+        onMain { act ->
             val v = act.findViewById<MapCanvasView>(R.id.mapCanvas)
             out = Triple(v.zoom, v.panX, v.tileCount)
         }
@@ -116,6 +171,66 @@ class MapCanvasInteractionTest {
     }
 
     /**
+     * The areas are invisible hit-boxes over a fixed picture now, so the only way to
+     * see that the calibration is right is to zoom in, press the pixel a landmark is
+     * drawn at, and read the name off the dialog that opens.
+     *
+     * Sunyshore City is the check because both shipped packs have a row for it and
+     * it is drawn as its own block (the big blue square at the foot of the eastern
+     * spit, at picture pixel 1016, 712).
+     */
+    @Test fun tappingALandmarkWhileZoomedInOpensThatArea() {
+        Thread.sleep(4000)
+
+        // Double tap *on* the block, not at the view centre: the zoom keeps the point
+        // under the finger put, so the block is still there afterwards to be tapped.
+        val fitted = sunyshoreOnScreen()
+        onView(withId(R.id.mapCanvas)).perform(clickAt(Tap.DOUBLE, fitted.first, fitted.second))
+        Thread.sleep(900)
+
+        val zoomed = sunyshoreOnScreen()
+        println("MAPTEST Sunyshore's block: fitted at $fitted, zoomed to ${zoomOf()} at $zoomed")
+
+        onView(withId(R.id.mapCanvas)).perform(clickAt(Tap.SINGLE, zoomed.first, zoomed.second))
+        // onSingleTapConfirmed waits out the double-tap window first.
+        Thread.sleep(1200)
+        capture("30_tapped_sunyshore")
+
+        onView(withId(R.id.areaName)).inRoot(isDialog())
+            .check(matches(withText("Sunyshore City")))
+
+        // Close it rather than leaving the scenario to tear the activity down with a
+        // dialog still attached, which leaks the window.
+        onView(withId(R.id.areaClose)).inRoot(isDialog()).perform(click())
+        Thread.sleep(400)
+    }
+
+    private fun zoomOf(): Float = state().first
+
+    /** Where the picture's Sunyshore pixel currently sits in the view. */
+    private fun sunyshoreOnScreen(): Pair<Float, Float> {
+        var out = 0f to 0f
+        onMain { act ->
+            val v = act.findViewById<MapCanvasView>(R.id.mapCanvas)
+            out = (v.panX + SUNYSHORE_IMAGE_X * v.zoom) to (v.panY + SUNYSHORE_IMAGE_Y * v.zoom)
+        }
+        return out
+    }
+
+    /** A tap at an exact point in the view, rather than at its centre. */
+    private fun clickAt(tap: Tap, x: Float, y: Float) = GeneralClickAction(
+        tap,
+        { view ->
+            val screen = IntArray(2)
+            view.getLocationOnScreen(screen)
+            floatArrayOf(screen[0] + x, screen[1] + y)
+        },
+        Press.FINGER,
+        InputDevice.SOURCE_TOUCHSCREEN,
+        MotionEvent.BUTTON_PRIMARY,
+    )
+
+    /**
      * The blink has to follow the game state while the screen stays open, so this
      * pokes the same provider the manual picker uses and watches the highlight
      * move without the activity being recreated.
@@ -147,11 +262,11 @@ class MapCanvasInteractionTest {
     /** Drive the real provider, then park the camera on whatever lit up. */
     private fun showLocation(id: Int, frame: String): Int? {
         var highlighted: Int? = null
-        rule.scenario.onActivity {
+        onMain {
             com.enrpau.pokegeards.detection.GameStateRepository.manual.setLocation(id)
         }
         Thread.sleep(900)
-        rule.scenario.onActivity { act ->
+        onMain { act ->
             val v = act.findViewById<MapCanvasView>(R.id.mapCanvas)
             v.centreOnCurrent()
             highlighted = v.highlightedLocationId

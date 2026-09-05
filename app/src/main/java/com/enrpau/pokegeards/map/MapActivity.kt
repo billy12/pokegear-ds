@@ -25,15 +25,19 @@ import com.enrpau.pokegeards.habitat.EncounterCardDialog
 import java.util.concurrent.Executors
 
 /**
- * Region map. Every area in the active pack's `location` table gets a tile, laid
- * out by [GraphLayout] from the [SinnohAdjacency] connectivity graph, so
- * neighbouring areas end up next to each other and the whole thing reads as a
- * map instead of an alphabetical grid. Pinch to zoom, drag to pan.
+ * Region map. The screen is the hand-drawn region picture; every area in the active
+ * pack's `location` table becomes an invisible tap target on it.
  *
- * Tapping a tile shows the unfiltered encounter list for that area, straight from
+ * Where each target sits is still worked out by [GraphLayout] from the real Sinnoh
+ * coordinates in [com.enrpau.pokegeards.map.GeographicAnchors], with interiors
+ * parked next to the named place they open off via the [SinnohAdjacency] graph;
+ * [MapProjection] then converts that onto the picture's pixels. Pinch to zoom, drag
+ * to pan.
+ *
+ * Tapping an area shows the unfiltered encounter list for it, straight from
  * [PokegearDb.getEncounters] — unchanged from the grid version of this screen.
  *
- * The tile for wherever detection currently thinks the player is pulses, and
+ * Wherever detection currently thinks the player is gets a pulsing marker, and it
  * follows [GameStateRepository.state] live.
  */
 class MapActivity : AppCompatActivity() {
@@ -80,8 +84,6 @@ class MapActivity : AppCompatActivity() {
     }
 
     private fun load() {
-        val nodeW = canvas.tileWorldWidth.toDouble()
-        val nodeH = canvas.tileWorldHeight.toDouble()
         io.execute {
             val locs = db.getLocations()
             val active = db.activePackId()
@@ -90,25 +92,27 @@ class MapActivity : AppCompatActivity() {
             // (South)") match no SinnohAdjacency key, so resolve through the
             // base-name fallback rather than the raw edge list.
             val edges = PackAdjacency.forPack(locs.map { it.name })
-            // ~150 nodes x ~300 force iterations — cheap, but not on the main thread.
+            // ~150 nodes, anchor lookup plus a de-overlap pass — cheap, but the
+            // pack read in front of it is not, so keep the whole thing off the main
+            // thread.
             val started = System.currentTimeMillis()
             val layout = GraphLayout.layout(
                 nodes = locs.map { it.name.lowercase() },
                 edges = edges,
-                nodeWidth = nodeW,
-                nodeHeight = nodeH,
-                padding = nodeH * 0.35,
+                nodeWidth = MapProjection.NODE_SIZE,
+                nodeHeight = MapProjection.NODE_SIZE,
+                padding = MapProjection.NODE_PADDING,
             )
             android.util.Log.d(
                 TAG,
                 "layout ${locs.size} areas in ${System.currentTimeMillis() - started}ms, " +
-                    "${layout.iterations} iterations, ${layout.isolated.size} unconnected",
+                    "${layout.anchored} on a real anchor, ${layout.iterations} de-overlap passes, " +
+                    "${layout.isolated.size} unplaceable",
             )
             main.post {
                 if (isFinishing || isDestroyed) return@post
                 tvPack.text = getString(R.string.map_title) + "  ·  " + name
-                canvas.submit(locs, layout, edges)
-                theme?.let { canvas.applyTheme(it) }
+                canvas.submit(locs, layout)
                 tvEmpty.visibility = if (locs.isEmpty()) View.VISIBLE else View.GONE
                 canvas.visibility = if (locs.isEmpty()) View.GONE else View.VISIBLE
                 // The location observer may well have fired before the tiles
@@ -160,8 +164,6 @@ class MapActivity : AppCompatActivity() {
         tvPack.setTextColor(t.headerTextColor)
         tvEmpty.setTextColor(t.subTextColor)
         findViewById<TextView>(R.id.tvMapHint).setTextColor(t.subTextColor)
-
-        canvas.applyTheme(t)
     }
 
     /**

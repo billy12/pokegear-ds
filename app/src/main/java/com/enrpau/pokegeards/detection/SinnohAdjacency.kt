@@ -5,8 +5,9 @@ package com.enrpau.pokegeards.detection
  *
  *  1. [LocationResolver], to disambiguate a route banner that resolves to a split
  *     family (e.g. "Route 204" -> both "Route 204 (South)" and "Route 204 (North)");
- *  2. the region map screen, which feeds the same edge list to a force-directed
- *     graph layout so the tiles land in roughly their real geographic relation.
+ *  2. the region map screen, which walks the same edge list to park every interior
+ *     row (cave floors, dungeon rooms) beside the named place it opens off — the
+ *     named places themselves come from [com.enrpau.pokegeards.map.GeographicAnchors].
  *
  * Keyed by the exact `name` string in a pack's locations.csv so it stays readable
  * and a new edge is one line. Edges are declared once and mirrored automatically
